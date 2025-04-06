@@ -14,6 +14,11 @@ _Last updated: 28 Feb 2023_
 
 ← `script.js`: If you're feeling fancy you can add interactivity to your site with JavaScript. The code in the JavaScript file runs when the page loads, and when the visitor clicks the button you can add using the code in the TODO.
 
+← `DB_schema.js`:   THIS IS A NEW FILE ADDED BY ME IT BE DATABASE
+
+← `CRUD_ops.js`: THIS IS THE FILE THAT LETS US MESS WITH DATABASE
+
+
 Open each file and check out the comments (in gray) for more info.
 
 ## Try this next 🏗️
