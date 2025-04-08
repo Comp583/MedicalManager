@@ -1,5 +1,41 @@
+// Patient CRUD Operations
+const createPatient = async (patientData) => {
+  try {
+    const result = await db.patients.insertOne({
+      ...patientData,
+      createdAt: new Date()
+    });
+    return result;
+  } catch (error) {
+    if (error.code === 11000) {
+      throw new Error('Username or Patient ID already exists');
+    }
+    throw error;
+  }
+};
+
+const getPatientByUsername = async (username) => {
+  return await db.patients.findOne({ username });
+};
+
+const getPatientById = async (patientId) => {
+  return await db.patients.findOne({ _id: new ObjectId(patientId) });
+};
+
+const updatePatientInfo = async (patientId, updateData) => {
+  return await db.patients.updateOne(
+    { _id: new ObjectId(patientId) },
+    { $set: updateData }
+  );
+};
+
 // 1. CREATE: Book a new appointment
-function bookAppointment(doctorId, patientId, dateTime, duration, appointmentType, reasonForVisit) {
+async function bookAppointment(doctorId, patientId, dateTime, duration, appointmentType, reasonForVisit) {
+  // Validate patient exists
+  const patient = await getPatientById(patientId);
+  if (!patient) {
+    throw new Error('Invalid patient ID');
+  }
     return db.appointments.insertOne({
       doctorId: ObjectId(doctorId),
       patientId: ObjectId(patientId),

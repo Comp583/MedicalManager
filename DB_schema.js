@@ -205,6 +205,56 @@ db.createCollection("doctors", {
   // Create unique index on username
   db.admins.createIndex({ "username": 1 }, { unique: true });
 
+  // Patients Collection
+  db.createCollection("patients", {
+    validator: {
+      $jsonSchema: {
+        bsonType: "object",
+        required: ["username", "password", "fullName", "patientId", "phoneNumber"],
+        properties: {
+          username: {
+            bsonType: "string",
+            description: "Patient's username - must be unique"
+          },
+          password: {
+            bsonType: "string",
+            description: "Patient's password (stored as plaintext per requirements)"
+          },
+          fullName: {
+            bsonType: "object",
+            required: ["firstName", "lastName"],
+            properties: {
+              firstName: {
+                bsonType: "string",
+                description: "Patient's first name"
+              },
+              lastName: {
+                bsonType: "string",
+                description: "Patient's last name"
+              }
+            }
+          },
+          patientId: {
+            bsonType: "string",
+            description: "Patient's unique medical identifier"
+          },
+          phoneNumber: {
+            bsonType: "string",
+            description: "Patient's contact number"
+          },
+          createdAt: {
+            bsonType: "date",
+            description: "When account was created"
+          }
+        }
+      }
+    }
+  });
+
+  // Create unique indexes
+  db.patients.createIndex({ "username": 1 }, { unique: true });
+  db.patients.createIndex({ "patientId": 1 }, { unique: true });
+
   // Audit Log Collection
   db.createCollection("audit_log", {
     validator: {
