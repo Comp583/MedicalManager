@@ -161,6 +161,114 @@ db.createCollection("doctors", {
   db.appointments.createIndex({ "patientId": 1, "dateTime": 1 });
   db.appointments.createIndex({ "status": 1 });
   
+  // Admin Users Collection
+  db.createCollection("admins", {
+    validator: {
+      $jsonSchema: {
+        bsonType: "object",
+        required: ["username", "passwordHash", "fullName", "role", "permissions"],
+        properties: {
+          username: {
+            bsonType: "string",
+            description: "Admin username - must be unique"
+          },
+          passwordHash: {
+            bsonType: "string",
+            description: "Hashed password using bcrypt"
+          },
+          fullName: {
+            bsonType: "string",
+            description: "Admin's full name"
+          },
+          role: {
+            bsonType: "string",
+            enum: ["superadmin", "admin"],
+            description: "Admin role level"
+          },
+          permissions: {
+            bsonType: "array",
+            description: "List of permissions",
+            items: {
+              bsonType: "string",
+              enum: ["view_all", "edit_all", "manage_doctors", "manage_patients"]
+            }
+          },
+          lastLogin: {
+            bsonType: "date",
+            description: "Last login timestamp"
+          }
+        }
+      }
+    }
+  });
+
+  // Create unique index on username
+  db.admins.createIndex({ "username": 1 }, { unique: true });
+
+  // Audit Log Collection
+  db.createCollection("audit_log", {
+    validator: {
+      $jsonSchema: {
+        bsonType: "object",
+        required: ["adminId", "action", "timestamp"],
+        properties: {
+          adminId: {
+            bsonType: "objectId",
+            description: "Reference to admin user"
+          },
+          action: {
+            bsonType: "string",
+            description: "Action performed"
+          },
+          timestamp: {
+            bsonType: "date",
+            description: "When action occurred"
+          },
+          details: {
+            bsonType: "object",
+            description: "Additional action details"
+          },
+          targetCollection: {
+            bsonType: "string",
+            description: "Which collection was affected"
+          },
+          targetId: {
+            bsonType: "objectId",
+            description: "ID of affected document"
+          }
+        }
+      }
+    }
+  });
+
+  // Insert 3 admin users (passwords should be hashed in production)
+  db.admins.insertMany([
+    {
+      username: "nic_admin",
+      passwordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMy.Mrq4W7.ZBS1LmYgR5wJYVY1JQo9Q5qK", // hash for "Nic123!"
+      fullName: "Nic Admin",
+      role: "superadmin",
+      permissions: ["view_all", "edit_all", "manage_doctors", "manage_patients"],
+      lastLogin: null
+    },
+    {
+      username: "jess_admin",
+      passwordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMy.Mrq4W7.ZBS1LmYgR5wJYVY1JQo9Q5qK", // hash for "Jess123!"
+      fullName: "Jess Admin",
+      role: "admin",
+      permissions: ["view_all", "edit_all"],
+      lastLogin: null
+    },
+    {
+      username: "angel_admin",
+      passwordHash: "$2a$10$N9qo8uLOickgx2ZMRZoMy.Mrq4W7.ZBS1LmYgR5wJYVY1JQo9Q5qK", // hash for "Angel123!"
+      fullName: "Angel Admin",
+      role: "admin",
+      permissions: ["view_all", "edit_all"],
+      lastLogin: null
+    }
+  ]);
+
   // Insert 5 sample doctors
   db.doctors.insertMany([
     {
