@@ -1,0 +1,108 @@
+:root {
+  --color-bg: #69F7BE;
+  --color-text-main: #000000;
+  --color-text-header: #2800FF;
+  --color-primary: #FFFF00;
+  --font-family: "HK Grotesk", sans-serif;
+  --font-family-header: "HK Grotesk", sans-serif;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: var(--font-family);
+  background-color: var(--color-bg);
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-bg);
+  padding: 1rem;
+  gap: 2rem;
+  width: 100vw;
+  height: 100vh;
+  box-sizing: border-box;
+}
+.login-title {
+  font-size: 3rem;
+  color: var(--color-text-header);
+  text-align: center;
+  margin: 0;
+  font-weight: bold;
+  font-family: var(--font-family-header);
+}
+.login-box {
+  background: #ffffff;
+  padding: 2rem 3rem;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  width: 320px;
+  gap: 1.5rem;
+  box-sizing: border-box;
+}
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+}
+.login-form label {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  color: var(--color-text-main);
+}
+.login-form input[type="text"],
+.login-form input[type="password"] {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #000000;
+  border-radius: 6px;
+  font-size: 1rem;
+  font-family: var(--font-family);
+  box-sizing: border-box;
+  display: block;
+}
+.forgot-link {
+  font-size: 0.9rem;
+  color: var(--color-text-header);
+  text-decoration: underline;
+  cursor: pointer;
+  align-self: flex-start;
+  margin-top: 0.25rem;
+}
+.login-button {
+  margin-top: 1rem;
+  padding: 0.75rem;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  font-size: 1.1rem;
+  cursor: pointer;
+  color: #000000;
+  transition: background-color 0.3s ease;
+}
+.login-button:hover {
+  background-color: #e6e600;
+}
+.signup-prompt {
+  margin-top: 1rem;
+  font-size: 1rem;
+  color: var(--color-text-main);
+}
+.signup-prompt a.signup-link {
+  color: var(--color-text-header);
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+  margin-left: 0.25rem;
+}
