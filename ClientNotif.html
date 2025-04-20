@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Notifications for Clients - Bright Sight Optometry</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f9f9f9;
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .navbar {
+      background-color: #007bff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: white !important;
+    }
+    .nav-link {
+      margin-left: 15px;
+      margin-right: 15px;
+      cursor: pointer;
+    }
+    .nav-link.active {
+      background-color: #0056b3;
+      border-radius: 5px;
+    }
+    .profile-icon img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+    .container {
+      margin-top: 20px;
+    }
+    .notifications-box {
+      background-color: white;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .notification-item {
+      border-bottom: 1px solid #dee2e6;
+      padding: 15px 0;
+      display: flex;
+      align-items: flex-start;
+    }
+    .notification-item:last-child {
+      border-bottom: none;
+    }
+    .checkbox {
+      margin-right: 15px;
+      width: 20px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+    .notification-content {
+      flex: 1;
+    }
+    .notification-title {
+      font-weight: 600;
+      margin-bottom: 5px;
+      color: #212529;
+    }
+    .notification-details {
+      color: #6c757d;
+      margin-bottom: 10px;
+    }
+    .notification-actions {
+      display: flex;
+      gap: 10px;
+    }
+    .btn-small {
+      padding: 5px 15px;
+      font-size: 0.875rem;
+    }
+    .date {
+      margin-left: auto;
+      color: #495057;
+      font-size: 0.875rem;
+      flex-shrink: 0;
+      padding-left: 10px;
+    }
+    .tools {
+      padding: 10px 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #dee2e6;
+      margin-bottom: 15px;
+    }
+    .select-all {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .delete-btn {
+      color: #d9534f;
+      font-weight: 600;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+    }
+    .delete-btn:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand" href="#">Bright Sight Optometry</a>
+      </div>
+      <div class="d-flex justify-content-center flex-grow-1">
+        <a class="nav-link" href="ClientBooking.html">Book</a>
+        <a class="nav-link" href="#">Notifications</a>
+<a class="nav-link" href="ClientDrView.html">Manage Dr</a>
+      </div>
+      <div class="dropdown ms-3">
+        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="images/ProfilePic.png" alt="User Profile" class="rounded-circle" width="35" height="35">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+          <li><a class="dropdown-item" href="ClientLandingPage">Profile</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item" href="LoginPage.html">Sign Out</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="container">
+    <div class="notifications-box">
+      <div class="tools">
+        <div class="select-all">
+          <input type="checkbox" id="select-all" />
+          <label for="select-all" class="mb-0">Select all</label>
+        </div>
+        <button class="delete-btn" id="delete-btn">Delete</button>
+      </div>
+
+      <div class="notification-item">
+        <input type="checkbox" class="checkbox" />
+        <div class="notification-content">
+          <div class="notification-title">Appointment booked!</div>
+          <div class="notification-details">Details...</div>
+        </div>
+        <div class="date">Date</div>
+      </div>
+
+      <div class="notification-item">
+        <input type="checkbox" class="checkbox" />
+        <div class="notification-content">
+          <div class="notification-title">Dr. requested change</div>
+          <div class="notification-details">Details...</div>
+          <div class="notification-actions">
+            <button class="btn btn-outline-primary btn-small">Accept</button>
+            <button class="btn btn-outline-danger btn-small">Decline</button>
+          </div>
+        </div>
+        <div class="date">Date</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Toggle select all functionality
+    document.getElementById('select-all').addEventListener('change', function () {
+      const checkboxes = document.querySelectorAll('.checkbox');
+      checkboxes.forEach((checkbox) => {
+        checkbox.checked = this.checked;
+      });
+    });
+
+    // Delete button functionality
+    document.getElementById('delete-btn').addEventListener('click', function () {
+      const selectedItems = document.querySelectorAll('.checkbox:checked');
+      selectedItems.forEach((checkbox) => {
+        const item = checkbox.closest('.notification-item');
+        if (item) {
+          item.style.display = 'none';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

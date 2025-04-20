@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bright Sight Optometry - Book Appointment</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <style>
+    body {
+      background-color: #f9f9f9;
+      font-family: 'Segoe UI', sans-serif;
+    }
+    .navbar {
+      background-color: #007bff;
+    }
+    .navbar-brand, .nav-link, .navbar-text {
+      color: white !important;
+    }
+    .nav-link {
+      margin-left: 15px;
+      margin-right: 15px;
+    }
+    .booking-container {
+      max-width: 900px;
+      margin: 40px auto;
+      background-color: white;
+      border-radius: 8px;
+      padding: 30px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    .form-label {
+      font-weight: 600;
+    }
+    .btn-primary {
+      background-color: #007bff;
+      border-color: #007bff;
+    }
+    .btn-primary:hover {
+      background-color: #0056b3;
+      border-color: #0056b3;
+    }
+    .profile-icon img {
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body>
+  <!-- Navbar -->
+  <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg">
+    <div class="container-fluid">
+      <div class="d-flex align-items-center">
+        <a class="navbar-brand" href="#">Bright Sight Optometry</a>
+      </div>
+      <div class="d-flex justify-content-center flex-grow-1">
+        <a class="nav-link" href="#">Book</a>
+        <a class="nav-link" href="ClientNotif.html">Notifications</a>
+<a class="nav-link" href="ClientDrView.html">Manage Dr</a>
+      </div>
+      <div class="dropdown ms-3">
+        <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
+          <img src="images/ProfilePic.png" alt="User Profile" class="rounded-circle" width="35" height="35" />
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+          <li><a class="dropdown-item" href="ClientLandingPage">Profile</a></li>
+          <li><hr class="dropdown-divider" /></li>
+          <li><a class="dropdown-item" href="LoginPage.html">Sign Out</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-4">
+    <h3 class="mb-4">Book an Appointment</h3>
+    <div class="row">
+      <div class="col-md-6">
+        <div class="calendar-box">
+          <div id="calendar"></div>
+        </div>
+      </div>
+      <div class="col-md-6">
+        <div class="booking-container">
+          <form id="bookingForm">
+            <div class="mb-3">
+              <label for="doctorSelect" class="form-label">Select Doctor</label>
+              <select class="form-select" id="doctorSelect" required>
+                <option value="" disabled selected>Select a doctor</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="appointmentDate" class="form-label">Date</label>
+              <input type="text" class="form-control" id="appointmentDate" placeholder="YYYY-MM-DD" required />
+            </div>
+            <div class="mb-3">
+              <label for="appointmentTime" class="form-label">Time</label>
+              <select class="form-select" id="appointmentTime" required>
+                <option value="" disabled selected>Select a time slot</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="appointmentType" class="form-label">Appointment Type</label>
+              <select class="form-select" id="appointmentType" required>
+                <option value="" disabled selected>Select type</option>
+                <option value="check-up">Check-up</option>
+                <option value="follow-up">Follow-up</option>
+                <option value="consultation">Consultation</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="reasonForVisit" class="form-label">Reason for Visit</label>
+              <textarea class="form-control" id="reasonForVisit" rows="3" placeholder="Describe your reason for visit" required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Book Appointment</button>
+          </form>
+          <div id="bookingMessage" class="mt-3"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
+  <script src="CRUD_ops.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        height: 500,
+        eventDidMount: function(info) {
+          const tooltip = document.createElement('div');
+          tooltip.innerText = info.event.title;
+          tooltip.style.position = 'absolute';
+          tooltip.style.backgroundColor = '#fff';
+          tooltip.style.border = '1px solid #ccc';
+          tooltip.style.padding = '5px';
+          tooltip.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
+          tooltip.style.zIndex = 9999;
+          tooltip.style.opacity = 1;
+          tooltip.classList.add('fc-tooltip');
+
+          info.el.addEventListener('mouseenter', function (e) {
+            document.body.appendChild(tooltip);
+            tooltip.style.top = e.pageY + 10 + 'px';
+            tooltip.style.left = e.pageX + 10 + 'px';
+          });
+
+          info.el.addEventListener('mousemove', function (e) {
+            tooltip.style.top = e.pageY + 10 + 'px';
+            tooltip.style.left = e.pageX + 10 + 'px';
+          });
+
+          info.el.addEventListener('mouseleave', function () {
+            tooltip.remove();
+          });
+        },
+        events: [
+          {
+            title: 'Dr. Smith - 10:30 AM',
+            start: '2025-04-15'
+          },
+          {
+            title: 'Dr. Lee - 2:00 PM',
+            start: '2025-04-17'
+          }
+        ]
+      });
+      calendar.render();
+    });
+
+    // Simulated user ID for demonstration; replace with actual logged-in user ID
+    const currentPatientId = "some-patient-id";
+
+    // Fetch doctors and populate the doctor select dropdown
+    async function fetchDoctors() {
+      // Simulate fetching doctors from database
+      // Replace with actual DB call or API
+      const doctors = await db.doctors.find().toArray(); // Placeholder, adjust as needed
+      const doctorSelect = document.getElementById('doctorSelect');
+      doctors.forEach(doc => {
+        const option = document.createElement('option');
+        option.value = doc._id;
+        option.textContent = `${doc.legalName.firstName} ${doc.legalName.lastName} (${doc.specialization})`;
+        doctorSelect.appendChild(option);
+      });
+    }
+
+    // Fetch available slots for selected doctor and date
+    async function fetchAvailableSlots(doctorId, date) {
+      // Simulate fetching available slots from DB
+      // Replace with actual DB call or API
+      const result = await findAvailableSlots(doctorId, date, 30); // 30 min duration
+      const appointmentTime = document.getElementById('appointmentTime');
+      appointmentTime.innerHTML = '<option value="" disabled selected>Select a time slot</option>';
+      if (result.success) {
+        result.availableSlots.forEach(slot => {
+          const option = document.createElement('option');
+          option.value = slot;
+          option.textContent = slot;
+          appointmentTime.appendChild(option);
+        });
+      }
+    }
+
+    document.getElementById('doctorSelect').addEventListener('change', (e) => {
+      const doctorId = e.target.value;
+      const date = document.getElementById('appointmentDate').value;
+      if (doctorId && date) {
+        fetchAvailableSlots(doctorId, date);
+      }
+    });
+
+    document.getElementById('appointmentDate').addEventListener('change', (e) => {
+      const date = e.target.value;
+      const doctorId = document.getElementById('doctorSelect').value;
+      if (doctorId && date) {
+        fetchAvailableSlots(doctorId, date);
+      }
+    });
+
+    document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const doctorId = document.getElementById('doctorSelect').value;
+      const date = document.getElementById('appointmentDate').value;
+      const time = document.getElementById('appointmentTime').value;
+      const appointmentType = document.getElementById('appointmentType').value;
+      const reasonForVisit = document.getElementById('reasonForVisit').value;
+
+      if (!doctorId || !date || !time || !appointmentType || !reasonForVisit) {
+        alert('Please fill in all fields.');
+        return;
+      }
+
+      const dateTime = new Date(`${date}T${time}:00`);
+
+      try {
+        await bookAppointment(doctorId, currentPatientId, dateTime.toISOString(), 30, appointmentType, reasonForVisit);
+        document.getElementById('bookingMessage').textContent = 'Appointment booked successfully!';
+        document.getElementById('bookingForm').reset();
+        document.getElementById('appointmentTime').innerHTML = '<option value="" disabled selected>Select a time slot</option>';
+      } catch (error) {
+        document.getElementById('bookingMessage').textContent = 'Failed to book appointment: ' + error.message;
+      }
+    });
+
+    // Initialize page
+    document.addEventListener('DOMContentLoaded', () => {
+      fetchDoctors();
+    });
+  </script>
+</body>
+</html>
