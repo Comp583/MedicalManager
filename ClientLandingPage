@@ -57,7 +57,7 @@
         <a class="nav-link" href="ClientLandingPage">Home</a>
         <a class="nav-link" href="ClientBooking">Book</a>
         <a class="nav-link" href="ClientNotif">Notifications</a>
-        <a class="nav-link" href="#">Manage Dr</a>
+        <a class="nav-link" href="ClientDrView">Manage Dr</a>
       </div>
       <div class="dropdown ms-3">
         <a href="#" class="d-flex align-items-center text-decoration-none dropdown-toggle" id="dropdownUser" data-bs-toggle="dropdown" aria-expanded="false">
