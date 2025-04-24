@@ -76,4 +76,14 @@
 		</plugins>
 	</build>
 
+	<resources>
+    <resource>
+        <directory>src/main/resources</directory>
+        <includes>
+            <include>static/**</include>
+            <include>templates/**</include>
+        </includes>
+    </resource>
+</resources>
+
 </project>
