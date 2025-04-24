@@ -1,7 +1,8 @@
 package com.medicalmanager.medical.repository;
 
-import com.medicalmanager.medical.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.medicalmanager.medical.model.User;
 
 import java.util.Optional;
 

@@ -1,6 +1,6 @@
 package com.medicalmanager.medical.service;
 
-import com.medicalmanager.medical.entity.User;
+import com.medicalmanager.medical.model.User;
 import com.medicalmanager.medical.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

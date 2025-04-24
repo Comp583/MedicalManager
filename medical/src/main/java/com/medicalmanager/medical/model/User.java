@@ -1,4 +1,4 @@
-package com.medicalmanager.medical.entity;
+package com.medicalmanager.medical.model;
 
 import jakarta.persistence.*;
 
