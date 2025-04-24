@@ -12,4 +12,9 @@ public class AdminController {
     public String landing() {
         return "admin-landing";
     }
+
+    @GetMapping("/avail")
+    public String adminAvail() {
+        return "adminAvail"; // Returns adminAvail.html
+    }
 }
