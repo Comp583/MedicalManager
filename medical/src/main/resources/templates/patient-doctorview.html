@@ -16,16 +16,18 @@
   </head>
   <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg patient-navbar">
+    <nav class="navbar navbar-expand-lg navbar-patient">
       <div class="container-fluid">
         <div class="d-flex align-items-center">
           <a class="navbar-brand" href="#">Bright Sight Optometry</a>
         </div>
         <div class="d-flex justify-content-center flex-grow-1">
-          <a class="nav-link" href="ClientLandingPage">Home</a>
-          <a class="nav-link" href="ClientBooking">Book</a>
-          <a class="nav-link" href="ClientNotif">Notifications</a>
-          <a class="nav-link" href="ClientDrView">Manage Dr</a>
+          <a class="nav-link" th:href="@{/patient/landing}">Home</a>
+          <a class="nav-link" th:href="@{/patient/booking}">Book</a>
+          <a class="nav-link" th:href="@{/patient/notifications}"
+            >Notifications</a
+          >
+          <a class="nav-link active" th:href="@{/patient/manage}">Manage Dr</a>
         </div>
         <div class="dropdown ms-3">
           <a
@@ -36,7 +38,7 @@
             aria-expanded="false"
           >
             <img
-              src="images/ProfilePic.png"
+              th:src="@{/img/ProfilePic.png}"
               alt="User Profile"
               class="rounded-circle"
               width="35"
@@ -49,7 +51,7 @@
           >
             <li><a class="dropdown-item" href="#">Profile</a></li>
             <li><hr class="dropdown-divider" /></li>
-            <li><a class="dropdown-item" href="LoginPage.html">Sign Out</a></li>
+            <li><a class="dropdown-item" th:href="@{/login}">Sign Out</a></li>
           </ul>
         </div>
       </div>

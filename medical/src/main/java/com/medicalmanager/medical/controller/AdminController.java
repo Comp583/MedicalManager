@@ -9,12 +9,17 @@ import org.springframework.web.bind.annotation.RequestMapping;
 public class AdminController {
 
     @GetMapping("/landing")
-    public String landing() {
+    public String adminLanding() {
         return "admin-landing";
     }
 
     @GetMapping("/avail")
     public String adminAvail() {
-        return "adminAvail"; // Returns adminAvail.html
+        return "admin-avail";
+    }
+
+    @GetMapping("/manage")
+    public String adminManage() {
+        return "admin-manage";
     }
 }

@@ -20,8 +20,23 @@ import jakarta.persistence.EntityNotFoundException;
 public class PatientController {
 
     @GetMapping("/landing")
-    public String landing() {
+    public String patientLanding() {
         return "patient-landing";
+    }
+
+    @GetMapping("/booking")
+    public String patientBooking() {
+        return "patient-booking";
+    }
+
+    @GetMapping("/notifications")
+    public String patientNotifications() {
+        return "patient-notifications";
+    }
+
+    @GetMapping("/manage")
+    public String patientDrView() {
+        return "patient-doctorview";
     }
 
     private final PatientService patientService;
