@@ -1,0 +1,38 @@
+body {
+  background-color: #f0f8ff;
+  font-family: "Segoe UI", sans-serif;
+}
+.login-container {
+  max-width: 400px;
+  margin: 5% auto;
+  padding: 30px;
+  background-color: white;
+  border-radius: 10px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+.login-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+.login-header h2 {
+  font-weight: bold;
+}
+.form-text {
+  font-size: 0.9rem;
+}
+.logo-placeholder {
+  text-align: center;
+  margin-bottom: 15px;
+}
+.logo-placeholder img {
+  max-width: 150px;
+  height: auto;
+}
+.form-links {
+  display: flex;
+  justify-content: space-between;
+}
+.signup-text {
+  text-align: center;
+  margin-top: 15px;
+}
