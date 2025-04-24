@@ -12,30 +12,29 @@ import com.medicalmanager.medical.model.Appointment;
 
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
-    List<Appointment> findByDoctorIdAndDateTimeBetweenOrderByDateTimeAsc(
-            Long doctorId, LocalDateTime startDate, LocalDateTime endDate);
+        List<Appointment> findByDoctorIdAndDateTimeBetweenOrderByDateTimeAsc(
+                        Long doctorId, LocalDateTime startDate, LocalDateTime endDate);
 
-    List<Appointment> findByPatientIdOrderByDateTimeAsc(Long patientId);
+        List<Appointment> findByPatientIdOrderByDateTimeAsc(Long patientId);
 
-    List<Appointment> findByStatusOrderByDateTimeAsc(String status);
+        List<Appointment> findByStatusOrderByDateTimeAsc(String status);
 
-    List<Appointment> findByDoctorIdAndDateTimeBetweenAndStatusInOrderByDateTimeAsc(
-            Long doctorId, LocalDateTime startDate, LocalDateTime endDate, List<String> statuses);
+        List<Appointment> findByDoctorIdAndDateTimeBetweenAndStatusInOrderByDateTimeAsc(
+                        Long doctorId, LocalDateTime startDate, LocalDateTime endDate, List<String> statuses);
 
-    @Query("SELECT a FROM Appointment a WHERE " +
-            "a.doctor.id = :doctorId AND " +
-            "a.status IN :statuses AND " +
-            "(" +
-            "  (a.dateTime < :endTime AND a.dateTime >= :startTime) OR " + // Starts in window
-            "  (a.dateTime + DATE_ADD('NUMTODSINTERVAL', a.duration, 'MINUTE') > :startTime AND " + // Ends in window
-            "  a.dateTime + DATE_ADD('NUMTODSINTERVAL', a.duration, 'MINUTE') <= :endTime) OR " +
-            "  (a.dateTime <= :startTime AND " + // Overlaps entire window
-            "   a.dateTime + DATE_ADD('NUMTODSINTERVAL', a.duration, 'MINUTE') >= :endTime)" +
-            ") ORDER BY a.dateTime ASC")
-    List<Appointment> findConflictingAppointments(
-            @Param("doctorId") Long doctorId,
-            @Param("startTime") LocalDateTime startTime,
-            @Param("endTime") LocalDateTime endTime,
-            @Param("statuses") List<String> statuses);
-
+        @Query("SELECT a FROM Appointment a WHERE " +
+                        "a.doctor.id = :doctorId AND " +
+                        "a.status IN :statuses AND " +
+                        "(" +
+                        "  (a.dateTime < :endTime AND a.dateTime >= :startTime) OR " +
+                        "  (FUNCTION('TIMESTAMPADD', MINUTE, a.duration, a.dateTime) > :startTime AND " +
+                        "   FUNCTION('TIMESTAMPADD', MINUTE, a.duration, a.dateTime) <= :endTime) OR " +
+                        "  (a.dateTime <= :startTime AND " +
+                        "   FUNCTION('TIMESTAMPADD', MINUTE, a.duration, a.dateTime) >= :endTime)" +
+                        ") ORDER BY a.dateTime ASC")
+        List<Appointment> findConflictingAppointments(
+                        @Param("doctorId") Long doctorId,
+                        @Param("startTime") LocalDateTime startTime,
+                        @Param("endTime") LocalDateTime endTime,
+                        @Param("statuses") List<String> statuses);
 }

@@ -8,6 +8,7 @@ import java.util.Map;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,14 +16,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
+import com.medicalmanager.medical.dto.AppointmentRequest;
 import com.medicalmanager.medical.model.Appointment;
 import com.medicalmanager.medical.service.AppointmentService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@RestController
+@Controller
 @RequestMapping("/api/appointments")
 public class AppointmentController {
     private final AppointmentService appointmentService;
@@ -134,63 +135,5 @@ public class AppointmentController {
 
         Map<String, Object> slots = appointmentService.findAvailableSlots(doctorId, date, duration);
         return ResponseEntity.ok(slots);
-    }
-}
-
-// Request DTO
-class AppointmentRequest {
-    private Long doctorId;
-    private Long patientId;
-    private LocalDateTime dateTime;
-    private Integer duration;
-    private String appointmentType;
-    private String reasonForVisit;
-
-    public Long getDoctorId() {
-        return doctorId;
-    }
-
-    public void setDoctorId(Long doctorId) {
-        this.doctorId = doctorId;
-    }
-
-    public Long getPatientId() {
-        return patientId;
-    }
-
-    public void setPatientId(Long patientId) {
-        this.patientId = patientId;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public String getAppointmentType() {
-        return appointmentType;
-    }
-
-    public void setAppointmentType(String appointmentType) {
-        this.appointmentType = appointmentType;
-    }
-
-    public String getReasonForVisit() {
-        return reasonForVisit;
-    }
-
-    public void setReasonForVisit(String reasonForVisit) {
-        this.reasonForVisit = reasonForVisit;
     }
 }
