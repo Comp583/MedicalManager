@@ -18,8 +18,8 @@ public class AdminController {
         return "admin-avail";
     }
 
-    @GetMapping("/manage")
-    public String adminManage() {
-        return "admin-manage";
+    @GetMapping("/managedrs")
+    public String adminmanagedrs() {
+        return "admin-managedrs";
     }
 }

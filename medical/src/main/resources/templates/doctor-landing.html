@@ -66,7 +66,7 @@
         <!-- Calendar -->
         <div class="col-md-6">
           <div class="calendar-box">
-            <div class="teams-label mb-2 fw-bold">Teams</div>
+            <div class="teams-label mb-2 fw-bold">Weekly Calendar View</div>
             <div id="calendar"></div>
           </div>
         </div>
@@ -98,9 +98,14 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         const calendarEl = document.getElementById("calendar");
+        const today = new Date().toISOString().split("T")[0];
         const calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: "dayGridMonth",
-          height: 500,
+          initialView: "timeGridWeek",
+          slotMinTime: "08:00:00",
+          slotMaxTime: "18:00:00",
+          slotDuration: "00:30:00",
+          nowIndicator: true,
+          height: 600,
           eventDidMount: function (info) {
             const tooltip = document.createElement("div");
             tooltip.innerText = info.event.title;
@@ -130,22 +135,21 @@
           },
           events: [
             {
-              title: "John Doe - Eye Exam - 2:30 PM",
-              start: new Date().toISOString().split("T")[0],
+              title: "John Doe - Eye Exam",
+              start: today + "T14:30:00",
+              end: today + "T15:00:00"
             },
             {
-              title: "Jane Smith - Contact Lens Fitting - 3:00 PM",
-              start: new Date(new Date().setDate(new Date().getDate() + 1))
-                .toISOString()
-                .split("T")[0],
+              title: "Jane Smith - Contact Lens Fitting",
+              start: today + "T15:00:00",
+              end: today + "T15:30:00"
             },
             {
-              title: "Robert Johnson - Vision Test - 3:15 PM",
-              start: new Date(new Date().setDate(new Date().getDate() + 1))
-                .toISOString()
-                .split("T")[0],
-            },
-          ],
+              title: "Robert Johnson - Vision Test",
+              start: today + "T15:15:00",
+              end: today + "T15:45:00"
+            }
+          ]
         });
         calendar.render();
       });

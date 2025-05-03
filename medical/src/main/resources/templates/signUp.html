@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Bright Sight Optometry - Sign Up</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f0f8ff;
+    }
+    .signup-container {
+      max-width: 500px;
+      margin: 50px auto;
+      padding: 30px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="signup-container">
+    <h2 class="text-center mb-4">Sign Up - Bright Sight Optometry</h2>
+    <form id="signupForm" novalidate>
+      <div class="mb-3">
+        <label for="firstName" class="form-label">First Name</label>
+        <input type="text" class="form-control" id="firstName">
+        <div class="error" id="firstNameError"></div>
+      </div>
+
+      <div class="mb-3">
+        <label for="lastName" class="form-label">Last Name</label>
+        <input type="text" class="form-control" id="lastName">
+        <div class="error" id="lastNameError"></div>
+      </div>
+
+      <div class="mb-3">
+        <label for="email" class="form-label">Email</label>
+        <input type="email" class="form-control" id="email">
+        <div class="error" id="emailError"></div>
+      </div>
+
+      <div class="mb-3">
+        <label for="dob" class="form-label">Date of Birth</label>
+        <input type="date" class="form-control" id="dob">
+        <div class="error" id="dobError"></div>
+      </div>
+
+      <div class="mb-3">
+        <label for="username" class="form-label">Username</label>
+        <input type="text" class="form-control" id="username">
+        <div class="error" id="usernameError"></div>
+      </div>
+
+      <div class="mb-3">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" class="form-control" id="password">
+        <div id="passwordHelp" class="form-text">
+          Password must be at least 8 characters, contain an uppercase letter, a number, and a special character.
+        </div>
+        <div class="error" id="passwordError"></div>
+      </div>
+
+      <button type="submit" class="btn btn-primary w-100">Sign Up</button>
+    </form>
+  </div>
+
+  <script>
+    function calculateAge(dobString) {
+      const dob = new Date(dobString);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const m = today.getMonth() - dob.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+      return age;
+    }
+
+    document.getElementById('signupForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      let hasError = false;
+
+      document.querySelectorAll('.error').forEach(el => el.textContent = '');
+
+      const firstName = document.getElementById('firstName').value.trim();
+      const lastName = document.getElementById('lastName').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const dob = document.getElementById('dob').value.trim();
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      const passwordRegex = /^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+      if (!firstName) {
+        document.getElementById('firstNameError').textContent = 'First name is required.';
+        hasError = true;
+      }
+
+      if (!lastName) {
+        document.getElementById('lastNameError').textContent = 'Last name is required.';
+        hasError = true;
+      }
+
+      if (!email) {
+        document.getElementById('emailError').textContent = 'Email is required.';
+        hasError = true;
+      } else if (!emailRegex.test(email)) {
+        document.getElementById('emailError').textContent = 'Please enter a valid email address.';
+        hasError = true;
+      }
+
+      if (!dob) {
+        document.getElementById('dobError').textContent = 'Date of birth is required.';
+        hasError = true;
+      } else {
+        const age = calculateAge(dob);
+        if (age < 5 || age > 100) {
+          document.getElementById('dobError').textContent = 'Age must be between 5 and 100 years.';
+          hasError = true;
+        }
+      }
+
+      if (!username) {
+        document.getElementById('usernameError').textContent = 'Username is required.';
+        hasError = true;
+      } else if (username.length < 6) {
+        document.getElementById('usernameError').textContent = 'Username must be at least 6 characters.';
+        hasError = true;
+      }
+
+      if (!password) {
+        document.getElementById('passwordError').textContent = 'Password is required.';
+        hasError = true;
+      } else if (!passwordRegex.test(password)) {
+        document.getElementById('passwordError').textContent =
+          'Password must be at least 8 characters long and include an uppercase letter, number, and special character.';
+        hasError = true;
+      }
+
+      if (!hasError) {
+        alert('Signup successful! (Validation passed)');
+        // this.submit(); // Optional: enable this when integrating backend
+      }
+    });
+  </script>
+
+</body>
+</html>
