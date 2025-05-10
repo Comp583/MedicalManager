@@ -1,23 +1,33 @@
 package com.medicalmanager.medical.model;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import jakarta.persistence.*;
 
 @Entity
 @Table(name = "available_slots")
 public class AvailableSlot {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "doctor_id")
+    public AvailableSlot() {}
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
-    private String dayOfWeek;
-    private String startTime;
-    private String endTime;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week", nullable = false)
+    private DayOfWeek dayOfWeek;
 
-    // Getters
+    @Column(name = "start_time", nullable = false)
+    private LocalTime startTime;
+
+    @Column(name = "end_time", nullable = false)
+    private LocalTime endTime;
+
     public Long getId() {
         return id;
     }
@@ -25,49 +35,28 @@ public class AvailableSlot {
     public Doctor getDoctor() {
         return doctor;
     }
-
-    public String getDayOfWeek() {
-        return dayOfWeek;
-    }
-
-    public String getStartTime() {
-        return startTime;
-    }
-
-    public String getEndTime() {
-        return endTime;
-    }
-
-    // Setters
-    public void setId(Long id) {
-        this.id = id;
-    }
-
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
     }
 
-    public void setDayOfWeek(String dayOfWeek) {
+    public DayOfWeek getDayOfWeek() {
+        return dayOfWeek;
+    }
+    public void setDayOfWeek(DayOfWeek dayOfWeek) {
         this.dayOfWeek = dayOfWeek;
     }
 
-    public void setStartTime(String startTime) {
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+    public void setStartTime(LocalTime startTime) {
         this.startTime = startTime;
     }
 
-    public void setEndTime(String endTime) {
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+    public void setEndTime(LocalTime endTime) {
         this.endTime = endTime;
     }
-    /*
-     * @Override
-     * public String toString() {
-     * return "AvailableSlot{" +
-     * "id=" + id +
-     * ", doctor=" + (doctor != null ? doctor.getId() : null) +
-     * ", dayOfWeek='" + dayOfWeek + '\'' +
-     * ", startTime='" + startTime + '\'' +
-     * ", endTime='" + endTime + '\'' +
-     * '}';
-     * }
-     */
 }
