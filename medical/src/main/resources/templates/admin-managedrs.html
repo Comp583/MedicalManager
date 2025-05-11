@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Manage Doctors - Bright Sight</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link rel="stylesheet" th:href="@{/css/styles.css}" />
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar navbar-expand-lg navbar-admin">
+    <div class="container-fluid">
+      <a class="navbar-brand" th:href="@{/admin/landing}">Bright Sight Admin</a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#adminNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="adminNav">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+          <li class="nav-item">
+            <a class="nav-link" th:href="@{/admin/landing}">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" th:href="@{/admin/managedrs}">Manage Doctors</a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="#" id="dropdownUser" data-bs-toggle="dropdown">
+              <img th:src="@{/img/ProfilePic.png}" class="rounded-circle" width="35" height="35"/>
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="dropdownUser">
+              <li><a class="dropdown-item" href="#">Profile</a></li>
+              <li><hr class="dropdown-divider"/></li>
+              <li><a class="dropdown-item" th:href="@{/login}">Sign Out</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container mt-5">
+    <h2 class="mb-4">Manage Doctors</h2>
+
+    <!-- DYNAMIC TABLE -->
+    <table class="table table-bordered table-striped">
+      <thead class="table-dark">
+        <tr>
+          <th>Name</th>
+          <th>Availability</th>
+          <th>Bio</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Loop through your doctors list -->
+        <tr th:each="doc : ${doctors}">
+          <td th:text="${doc.firstName} + ' ' + ${doc.lastName}">Dr. Name</td>
+          <td>
+            <ul class="mb-0 ps-3">
+              <!-- Loop availability map entries -->
+              <li th:each="entry : ${doc.availability.entrySet()}"
+                  th:text="|${entry.key.name()}: ${entry.value.start != null ? entry.value.start + '–' + entry.value.end : 'Off'}|">
+                Monday: 09:00–17:00
+              </li>
+            </ul>
+          </td>
+          <td th:text="${doc.biography}">Doctor bio here</td>
+          <td>
+            <a th:href="@{/admin/managedrs/edit/{id}(id=${doc.id})}" class="btn btn-warning btn-sm">Edit</a>
+            <a th:href="@{/admin/managedrs/delete/{id}(id=${doc.id})}" class="btn btn-danger btn-sm">Delete</a>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <div class="text-end">
+      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDoctorModal">
+        Add New Doctor
+      </button>
+    </div>
+  </div>
+
+  <!-- ADD DOCTOR MODAL -->
+  <div class="modal fade" id="addDoctorModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Add New Doctor</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+
+        <!-- Bind to the 'doctorForm' you added with @ModelAttribute -->
+        <form th:object="${doctorForm}"
+              th:action="@{/admin/managedrs/add}"
+              method="post"
+              class="needs-validation"
+              novalidate>
+          <div class="modal-body">
+            <div class="row g-3">
+              <!-- First Name -->
+              <div class="col-md-6">
+                <label for="firstName" class="form-label">First Name</label>
+                <input th:field="*{firstName}" type="text" class="form-control" id="firstName" required />
+                <div class="invalid-feedback">First name is required.</div>
+              </div>
+              <!-- Last Name -->
+              <div class="col-md-6">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input th:field="*{lastName}" type="text" class="form-control" id="lastName" required />
+                <div class="invalid-feedback">Last name is required.</div>
+              </div>
+              <!-- Username -->
+              <div class="col-md-6">
+                <label for="username" class="form-label">Username</label>
+                <input th:field="*{username}" type="text" class="form-control" id="username" required />
+                <div class="invalid-feedback">Username is required.</div>
+              </div>
+              <!-- Password -->
+              <div class="col-md-6">
+                <label for="password" class="form-label">Password</label>
+                <input th:field="*{password}"
+                       type="password"
+                       class="form-control"
+                       id="password"
+                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                       required />
+                <div class="form-text">At least 8 chars, 1 upper, 1 lower, 1 digit.</div>
+              </div>
+              <!-- Bio -->
+              <div class="col-12">
+                <label for="bio" class="form-label">Bio</label>
+                <textarea th:field="*{biography}" class="form-control" id="biography" rows="3" required></textarea>
+                <div class="invalid-feedback">Bio is required.</div>
+              </div>
+            </div>
+
+            <hr/>
+
+            <!-- AVAILABILITY -->
+            <h6>Availability</h6>
+            <div th:each="avail, stat : *{availabilities}"
+                 class="row align-items-center mb-2">
+
+              <input type="hidden"
+                    th:field="*{availabilities[__${stat.index}__].day}" />
+
+              <div class="col-2">
+                <label th:text="${avail.day.name()}">MONDAY</label>
+              </div>
+
+              <div class="col-3">
+                <input th:field="*{availabilities[__${stat.index}__].start}"
+                      th:id="|start_${stat.index}|"
+                      type="time"
+                      class="form-control"
+                      th:attr="disabled=${avail.off} ? 'disabled' : null" />
+              </div>
+
+              <div class="col-3">
+                <input th:field="*{availabilities[__${stat.index}__].end}"
+                      th:id="|end_${stat.index}|"
+                      type="time"
+                      class="form-control"
+                      th:attr="disabled=${avail.off} ? 'disabled' : null" />
+              </div>
+
+              <div class="col-2 form-check">
+                <input th:field="*{availabilities[__${stat.index}__].off}"
+                      type="checkbox"
+                      class="form-check-input off-toggle"
+                      th:id="|off_${stat.index}|" />
+                <label th:for="|off_${stat.index}|" class="form-check-label">Off</label>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+              Cancel
+            </button>
+            <button type="submit" class="btn btn-primary">
+              Add Doctor
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    (() => {
+      'use strict';
+      document.querySelectorAll('.needs-validation').forEach(form => {
+        form.addEventListener('submit', e => {
+          if (!form.checkValidity()) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        });
+      });
+    })();
+  </script>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.off-toggle').forEach(cb => {
+        cb.addEventListener('change', e => {
+          const idx = e.target.id.match(/\d+/)[0];
+          const start = document.getElementById(`start_${idx}`);
+          const end   = document.getElementById(`end_${idx}`);
+          if (e.target.checked) {
+            start.disabled  = true;
+            end.disabled    = true;
+            start.required  = false;
+            end.required    = false;
+          } else {
+            start.disabled  = false;
+            end.disabled    = false;
+            start.required  = true;
+            end.required    = true;
+          }
+        });
+      });
+    });
+  </script>
+</body>
+</html>

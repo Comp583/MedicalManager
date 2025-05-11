@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Error</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 2em; background-color: #f8d7da; color: #721c24; }
+        h1 { color: #721c24; }
+        .container { max-width: 600px; margin: auto; padding: 1em; background-color: #f5c6cb; border-radius: 8px; }
+        .status { font-weight: bold; }
+        .message { margin-top: 1em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Oops! An error occurred.</h1>
+        <p class="status">Status code: <span th:text="${statusCode}">N/A</span></p>
+        <p class="message">Error message: <span th:text="${errorMessage}">N/A</span></p>
+        <p>Please contact support if the problem persists.</p>
+    </div>
+</body>
+</html>
