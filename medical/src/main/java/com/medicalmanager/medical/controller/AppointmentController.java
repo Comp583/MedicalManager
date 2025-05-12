@@ -23,7 +23,9 @@ import com.medicalmanager.medical.service.AppointmentService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@Controller
+import org.springframework.web.bind.annotation.RestController;
+
+@RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
     private final AppointmentService appointmentService;
@@ -46,6 +48,18 @@ public class AppointmentController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @PostMapping("/log")
+    public ResponseEntity<String> logAppointment(@RequestBody AppointmentRequest request) {
+        System.out.println("Received appointment booking data:");
+        System.out.println("Doctor ID: " + request.getDoctorId());
+        System.out.println("Patient ID: " + request.getPatientId());
+        System.out.println("DateTime: " + request.getDateTime());
+        System.out.println("Duration: " + request.getDuration());
+        System.out.println("Appointment Type: " + request.getAppointmentType());
+        System.out.println("Reason for Visit: " + request.getReasonForVisit());
+        return ResponseEntity.ok("Logged appointment data successfully");
     }
 
     @GetMapping("/doctor/{doctorId}")

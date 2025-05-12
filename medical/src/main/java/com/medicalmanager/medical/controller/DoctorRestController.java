@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,5 +45,15 @@ public class DoctorRestController {
         List<Doctor> doctors = doctorService.findDoctorsByDay(dayOfWeek);
         logger.info("Doctors available on {} ({}): {}", date, dayOfWeek, doctors.size());
         return doctors;
+    }
+
+    @GetMapping("/api/doctors/{doctorId}/availableSlots")
+    public List<String> getAvailableSlots(
+        @PathVariable Long doctorId,
+        @RequestParam(value = "date")
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+
+        logger.info("Fetching available slots for doctor {} on date {}", doctorId, date);
+        return doctorService.getAvailableHourlySlots(doctorId, date);
     }
 }

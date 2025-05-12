@@ -91,10 +91,55 @@ document.addEventListener("DOMContentLoaded", function () {
     console.log("Date input changed:", selectedDate);
     if (selectedDate) {
       fetchDoctors(selectedDate);
+      fetchAvailableSlots();
     } else {
       fetchDoctors();
+      clearTimeSlots();
     }
   });
+
+  // Listen for changes on doctorSelect to fetch available slots
+  document.getElementById("doctorSelect").addEventListener("change", (e) => {
+    fetchAvailableSlots();
+  });
+
+  async function fetchAvailableSlots() {
+    const doctorSelect = document.getElementById("doctorSelect");
+    const appointmentDate = document.getElementById("appointmentDate").value;
+
+    if (!doctorSelect.value || !appointmentDate) {
+      clearTimeSlots();
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/doctors/${doctorSelect.value}/availableSlots?date=${appointmentDate}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch available slots");
+      }
+      const slots = await response.json();
+      populateTimeSlots(slots);
+    } catch (error) {
+      console.error("Error fetching available slots:", error);
+      clearTimeSlots();
+    }
+  }
+
+  function populateTimeSlots(slots) {
+    const appointmentTime = document.getElementById("appointmentTime");
+    appointmentTime.innerHTML = '<option value="" disabled selected>Select a time slot</option>';
+    slots.forEach(slot => {
+      const option = document.createElement("option");
+      option.value = slot;
+      option.textContent = slot;
+      appointmentTime.appendChild(option);
+    });
+  }
+
+  function clearTimeSlots() {
+    const appointmentTime = document.getElementById("appointmentTime");
+    appointmentTime.innerHTML = '<option value="" disabled selected>Select a time slot</option>';
+  }
 
   // Form submission
   document
@@ -102,14 +147,20 @@ document.addEventListener("DOMContentLoaded", function () {
     .addEventListener("submit", async (e) => {
       e.preventDefault();
 
+      const date = document.getElementById("appointmentDate").value;
+      const time = document.getElementById("appointmentTime").value;
+      const dateTime = date && time ? `${date}T${time}` : null;
+
       const formData = {
         doctorId: document.getElementById("doctorSelect").value,
         patientId: currentPatientId,
-        date: document.getElementById("appointmentDate").value,
-        time: document.getElementById("appointmentTime").value,
-        type: document.getElementById("appointmentType").value,
-        reason: document.getElementById("reasonForVisit").value,
+        dateTime: dateTime,
+        duration: 30,
+        appointmentType: document.getElementById("appointmentType").value,
+        reasonForVisit: document.getElementById("reasonForVisit").value,
       };
+
+      console.log("Booking form data:", formData);
 
       try {
         const headers = {
@@ -119,15 +170,21 @@ document.addEventListener("DOMContentLoaded", function () {
           headers[csrfHeader] = csrfToken;
         }
 
-        const response = await fetch("/api/appointments", {
+        const response = await fetch("/api/appointments/log", {
           method: "POST",
           headers: headers,
           body: JSON.stringify(formData),
         });
 
         if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.message || "Booking failed");
+          let errorMessage = "Booking failed";
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.message || errorMessage;
+          } catch (e) {
+            // response body empty or invalid JSON
+          }
+          throw new Error(errorMessage);
         }
 
         showSuccess("Appointment booked successfully!");

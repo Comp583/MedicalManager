@@ -46,4 +46,31 @@ public class DoctorService {
       )
       .collect(Collectors.toList());
   }
+
+  public List<String> getAvailableHourlySlots(Long doctorId, java.time.LocalDate date) {
+    Doctor doctor = doctorRepo.findById(doctorId)
+      .orElseThrow(() -> new NoSuchElementException("No doctor found with id " + doctorId));
+
+    java.time.DayOfWeek dayOfWeek = date.getDayOfWeek();
+
+    List<String> hourlySlots = new java.util.ArrayList<>();
+
+    if (doctor.getAvailableSlots() == null) {
+      return hourlySlots;
+    }
+
+    doctor.getAvailableSlots().stream()
+      .filter(slot -> slot.getDayOfWeek() == dayOfWeek)
+      .forEach(slot -> {
+        java.time.LocalTime start = slot.getStartTime();
+        java.time.LocalTime end = slot.getEndTime();
+
+        while (!start.isAfter(end.minusHours(1))) {
+          hourlySlots.add(start.toString());
+          start = start.plusHours(1);
+        }
+      });
+
+    return hourlySlots;
+  }
 }
