@@ -1,15 +1,19 @@
 package com.medicalmanager.medical.dto;
 
-import com.medicalmanager.medical.model.Doctor;
-
 import java.time.DayOfWeek;
 import java.util.ArrayList;
 import java.util.List;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import com.medicalmanager.medical.model.Doctor;
+import com.medicalmanager.medical.model.LocalTimeRange;
+
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+
 public class DoctorForm {
+  private Long id;
   @NotBlank private String firstName;
   @NotBlank private String lastName;
   @NotBlank private String username;
@@ -18,7 +22,6 @@ public class DoctorForm {
 
   private List<AvailabilityDto> availabilities = new ArrayList<>();
 
-  // ← Initialize all seven days here
   public DoctorForm() {
     for (DayOfWeek d : DayOfWeek.values()) {
       AvailabilityDto a = new AvailabilityDto();
@@ -36,6 +39,49 @@ public class DoctorForm {
     d.setBiography(biography);
     return d;
   }
+
+  public static DoctorForm fromDoctor(Doctor d) {
+    DoctorForm f = new DoctorForm();
+    f.setId(d.getId());
+    f.setFirstName(d.getFirstName());
+    f.setLastName(d.getLastName());
+    f.setUsername(d.getUsername());
+    f.setBiography(d.getBiography());
+
+    d.getAvailability().forEach((day, range) -> {
+      AvailabilityDto dto = f.getAvailabilities()
+                             .stream()
+                             .filter(av -> av.getDay() == day)
+                             .findFirst()
+                             .orElseThrow();
+      dto.setOff(false);
+      dto.setStart(range.getStart());
+      dto.setEnd(range.getEnd());
+    });
+    return f;
+  }
+
+  public void updateDoctor(Doctor d, PasswordEncoder encoder) {
+    d.setFirstName(firstName);
+    d.setLastName(lastName);
+    d.setBiography(biography);
+
+    if (password != null && !password.isBlank()) {
+      d.setPasswordHash(encoder.encode(password));
+    }
+
+    d.getAvailability().clear();
+    for (AvailabilityDto av : availabilities) {
+      if (!Boolean.TRUE.equals(av.getOff())) {
+        d.getAvailability()
+         .put(av.getDay(),
+              LocalTimeRange.of(av.getStart(), av.getEnd()));
+      }
+    }
+  }
+
+  public Long getId() { return id; }
+  public void setId(Long id) { this.id = id; }
 
   public String getFirstName() { return firstName; }
   public void setFirstName(String firstName) { this.firstName = firstName; }

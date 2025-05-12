@@ -62,41 +62,62 @@
               <!-- Loop availability map entries -->
               <li th:each="entry : ${doc.availability.entrySet()}"
                   th:text="|${entry.key.name()}: ${entry.value.start != null ? entry.value.start + '–' + entry.value.end : 'Off'}|">
-                Monday: 09:00–17:00
+                Monday: off
               </li>
             </ul>
           </td>
           <td th:text="${doc.biography}">Doctor bio here</td>
           <td>
-            <a th:href="@{/admin/managedrs/edit/{id}(id=${doc.id})}" class="btn btn-warning btn-sm">Edit</a>
-            <a th:href="@{/admin/managedrs/delete/{id}(id=${doc.id})}" class="btn btn-danger btn-sm">Delete</a>
-          </td>
-        </tr>
+            <button
+              class="btn btn-warning btn-sm"
+              th:onclick="|openEditModal(${doc.id});|"
+              data-bs-toggle="modal"
+              data-bs-target="#doctorModal">
+              Edit
+            </button>
+          <!-- DELETE -->
+          <form th:action="@{/admin/managedrs/delete/{id}(id=${doc.id})}"
+              method="post" class="d-inline" onsubmit="return confirm('Delete this doctor?');">
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <input type="hidden" name="_method" value="delete"/>
+          <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+        </form>
+        </td>
+      </tr>
       </tbody>
     </table>
 
     <div class="text-end">
-      <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDoctorModal">
+      <button type="button" 
+              class="btn btn-primary" 
+              data-bs-toggle="modal" 
+              data-bs-target="#doctorModal"
+              onclick="openAddModal()">
         Add New Doctor
       </button>
     </div>
   </div>
 
-  <!-- ADD DOCTOR MODAL -->
-  <div class="modal fade" id="addDoctorModal" tabindex="-1" aria-hidden="true">
+  <!-- ADD / EDIT DOCTOR MODAL -->
+  <div class="modal fade" id="doctorModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
         <div class="modal-header">
-          <h5 class="modal-title">Add New Doctor</h5>
+          <h5 class="modal-title" id="doctorModalLabel">Add New Doctor</h5>
           <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
 
-        <!-- Bind to the 'doctorForm' you added with @ModelAttribute -->
         <form th:object="${doctorForm}"
+              id="doctorForm"
               th:action="@{/admin/managedrs/add}"
               method="post"
               class="needs-validation"
               novalidate>
+
+          <!-- CSRF + method override -->
+          <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+          <input type="hidden" id="formMethod" name="_method" value="post"/>
+
           <div class="modal-body">
             <div class="row g-3">
               <!-- First Name -->
@@ -121,16 +142,19 @@
               <div class="col-md-6">
                 <label for="password" class="form-label">Password</label>
                 <input th:field="*{password}"
-                       type="password"
-                       class="form-control"
-                       id="password"
-                       pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
-                       required />
-                <div class="form-text">At least 8 chars, 1 upper, 1 lower, 1 digit.</div>
+                      type="password"
+                      class="form-control"
+                      id="password"
+                      pattern="(?=.*\d)(?=.*[a-z])(?=.*[A-Z]).{8,}"
+                      required />
+                <div class="form-text">
+                  <span id="pwHintAdd">At least 8 chars, 1 upper, 1 lower, 1 digit.</span>
+                  <span id="pwHintEdit" style="display:none">Leave blank to keep existing password.</span>
+                </div>
               </div>
               <!-- Bio -->
               <div class="col-12">
-                <label for="bio" class="form-label">Bio</label>
+                <label for="biography" class="form-label">Bio</label>
                 <textarea th:field="*{biography}" class="form-control" id="biography" rows="3" required></textarea>
                 <div class="invalid-feedback">Bio is required.</div>
               </div>
@@ -140,14 +164,14 @@
 
             <!-- AVAILABILITY -->
             <h6>Availability</h6>
-            <div th:each="avail, stat : *{availabilities}"
-                 class="row align-items-center mb-2">
-
+            <div th:each="avail, stat : ${doctorForm.availabilities}"
+                class="row align-items-center mb-2">
+              <!-- capture the enum day -->
               <input type="hidden"
                     th:field="*{availabilities[__${stat.index}__].day}" />
 
               <div class="col-2">
-                <label th:text="${avail.day.name()}">MONDAY</label>
+                <label th:text="${avail.day.name()}">DAY</label>
               </div>
 
               <div class="col-3">
@@ -155,7 +179,7 @@
                       th:id="|start_${stat.index}|"
                       type="time"
                       class="form-control"
-                      th:attr="disabled=${avail.off} ? 'disabled' : null" />
+                      th:disabled="${avail.off}" />
               </div>
 
               <div class="col-3">
@@ -163,7 +187,7 @@
                       th:id="|end_${stat.index}|"
                       type="time"
                       class="form-control"
-                      th:attr="disabled=${avail.off} ? 'disabled' : null" />
+                      th:disabled="${avail.off}" />
               </div>
 
               <div class="col-2 form-check">
@@ -173,15 +197,13 @@
                       th:id="|off_${stat.index}|" />
                 <label th:for="|off_${stat.index}|" class="form-check-label">Off</label>
               </div>
-
             </div>
           </div>
 
           <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-              Cancel
-            </button>
-            <button type="submit" class="btn btn-primary">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            <button type="submit" class="btn btn-primary"
+                    th:text="${editing} ? 'Save Changes' : 'Add Doctor'">
               Add Doctor
             </button>
           </div>
@@ -190,43 +212,105 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    (() => {
-      'use strict';
-      document.querySelectorAll('.needs-validation').forEach(form => {
-        form.addEventListener('submit', e => {
-          if (!form.checkValidity()) {
-            e.preventDefault();
-            e.stopPropagation();
-          }
-          form.classList.add('was-validated');
-        });
-      });
-    })();
-  </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      document.querySelectorAll('.off-toggle').forEach(cb => {
-        cb.addEventListener('change', e => {
-          const idx = e.target.id.match(/\d+/)[0];
-          const start = document.getElementById(`start_${idx}`);
-          const end   = document.getElementById(`end_${idx}`);
-          if (e.target.checked) {
-            start.disabled  = true;
-            end.disabled    = true;
-            start.required  = false;
-            end.required    = false;
-          } else {
-            start.disabled  = false;
-            end.disabled    = false;
-            start.required  = true;
-            end.required    = true;
-          }
+<script>
+  let editing = false;
+
+  function openAddModal() {
+    editing = false;
+    document.getElementById('doctorModalLabel').innerText = 'Add New Doctor';
+    document.getElementById('formMethod').value = 'post';
+    document.getElementById('doctorForm').action = '/admin/managedrs/add';
+
+    // clear all text fields by name
+    ['firstName','lastName','username','password','biography']
+      .forEach(field => {
+        const el = document.querySelector(`[name="${field}"]`);
+        if (el) el.value = '';
+      });
+
+    // reset all availability checkboxes
+    document.querySelectorAll('.off-toggle').forEach(cb => {
+      cb.checked = true;
+      cb.dispatchEvent(new Event('change'));
+    });
+
+    togglePasswordHints();
+  }
+
+  function openEditModal(id) {
+    editing = true;
+    document.getElementById('doctorModalLabel').innerText = 'Edit Doctor';
+    document.getElementById('formMethod').value = 'put';
+    document.getElementById('doctorForm').action = `/admin/managedrs/edit/${id}`;
+
+    fetch(`/admin/managedrs/${id}/json`)
+      .then(r => r.json())
+      .then(f => {
+        ['firstName','lastName','username','biography'].forEach(n => {
+          const el = document.querySelector(`[name="${n}"]`);
+          if (el) el.value = f[n] || '';
         });
+
+        // always clear password on edit
+        const pw = document.querySelector('[name="password"]');
+        if (pw) pw.value = '';
+
+        // fill availability DTOs
+        f.availabilities.forEach((av, i) => {
+          const off   = document.querySelector(`[name="availabilities[${i}].off"]`);
+          const start = document.querySelector(`[name="availabilities[${i}].start"]`);
+          const end   = document.querySelector(`[name="availabilities[${i}].end"]`);
+          if (off)   off.checked = av.off;
+          if (start) start.value   = av.start || '';
+          if (end)   end.value     = av.end   || '';
+          if (off)   off.dispatchEvent(new Event('change'));
+        });
+
+        togglePasswordHints();
+      });
+  }
+
+  function togglePasswordHints() {
+    document.getElementById('pwHintAdd').style.display  = editing ? 'none'  : 'inline';
+    document.getElementById('pwHintEdit').style.display = editing ? 'inline' : 'none';
+
+    const pw = document.querySelector('[name="password"]');
+    pw.required = !editing;
+    pw.disabled = false;
+  }
+
+  // bootstrap validation
+  (() => {
+    'use strict';
+    document.querySelectorAll('.needs-validation').forEach(form => {
+      form.addEventListener('submit', e => {
+        if (!form.checkValidity()) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        form.classList.add('was-validated');
       });
     });
-  </script>
+  })();
+
+  // off-toggle logic
+  document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.off-toggle').forEach(cb => {
+      cb.addEventListener('change', e => {
+        const i = e.target.id.match(/\d+/)[0];
+        const start = document.getElementById(`start_${i}`);
+        const end   = document.getElementById(`end_${i}`);
+        if (e.target.checked) {
+          start.disabled = end.disabled = true;
+          start.value = end.value = '';
+        } else {
+          start.disabled = end.disabled = false;
+        }
+      });
+    });
+  });
+</script>
 </body>
 </html>

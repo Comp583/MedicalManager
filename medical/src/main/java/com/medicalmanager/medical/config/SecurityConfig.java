@@ -1,13 +1,16 @@
 package com.medicalmanager.medical.config;
 
+import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.filter.HiddenHttpMethodFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -55,5 +58,13 @@ public class SecurityConfig {
          .permitAll()
       );
     return http.build();
+  }
+
+  @Bean
+  public FilterRegistrationBean<HiddenHttpMethodFilter> hiddenHttpMethodFilter(){
+      FilterRegistrationBean<HiddenHttpMethodFilter> bean = 
+          new FilterRegistrationBean<>(new HiddenHttpMethodFilter());
+      bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+      return bean;
   }
 }
