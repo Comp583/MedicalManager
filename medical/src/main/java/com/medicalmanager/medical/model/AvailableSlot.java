@@ -16,6 +16,7 @@ public class AvailableSlot {
 
     @ManyToOne(optional = false)
     @JoinColumn(name = "doctor_id", nullable = false)
+    @com.fasterxml.jackson.annotation.JsonBackReference
     private Doctor doctor;
 
     @Enumerated(EnumType.STRING)

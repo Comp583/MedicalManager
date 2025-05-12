@@ -7,19 +7,47 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Initialize calendar
   const calendarEl = document.getElementById("calendar");
+  let selectedDateCell = null;
+
   const calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: "dayGridMonth",
     height: 500,
+    selectable: true,
     events: "/api/appointments/calendar",
+    dateClick: function(info) {
+      console.log("Date clicked:", info.dateStr);
+      // Update the appointmentDate input with the clicked date in YYYY-MM-DD format
+      const appointmentDateInput = document.getElementById("appointmentDate");
+      appointmentDateInput.value = info.dateStr;
+      // Manually trigger change event to update doctors list
+      appointmentDateInput.dispatchEvent(new Event('change'));
+
+      // Remove highlight from previously selected date cell
+      if (selectedDateCell) {
+        selectedDateCell.classList.remove("selected-date");
+      }
+      // Find the clicked date cell element by data-date attribute
+      const newSelectedCell = calendarEl.querySelector(
+        `[data-date="${info.dateStr}"]`
+      );
+      if (newSelectedCell) {
+        newSelectedCell.classList.add("selected-date");
+        selectedDateCell = newSelectedCell;
+      }
+    },
     // ... rest of your calendar config
   });
   calendar.render();
 
   // Current user - you might get this from a session or JWT
-  const currentPatientId = getCurrentPatientId(); // Implement this function
+  function getCurrentPatientId() {
+    // TODO: Replace with actual logic to get current patient ID
+    return 1;
+  }
+  const currentPatientId = getCurrentPatientId();
 
   // Fetch doctors
-  async function fetchDoctors() {
+  async function fetchDoctors(date) {
     try {
       const headers = {
         "Content-Type": "application/json",
@@ -28,7 +56,12 @@ document.addEventListener("DOMContentLoaded", function () {
         headers[csrfHeader] = csrfToken;
       }
 
-      const response = await fetch("/api/doctors", {
+      let url = "/api/doctors";
+      if (date) {
+        url += `?date=${date}`;
+      }
+
+      const response = await fetch(url, {
         method: "GET",
         headers: headers,
       });
@@ -43,7 +76,7 @@ document.addEventListener("DOMContentLoaded", function () {
       doctors.forEach((doc) => {
         const option = document.createElement("option");
         option.value = doc.id;
-        option.textContent = `${doc.firstName} ${doc.lastName} (${doc.specialization})`;
+        option.textContent = `${doc.firstName} ${doc.lastName}`;
         doctorSelect.appendChild(option);
       });
     } catch (error) {
@@ -51,6 +84,17 @@ document.addEventListener("DOMContentLoaded", function () {
       showError("Error loading doctors. Please try again.");
     }
   }
+
+  // Listen for changes on appointmentDate input to fetch doctors for selected date
+  document.getElementById("appointmentDate").addEventListener("change", (e) => {
+    const selectedDate = e.target.value;
+    console.log("Date input changed:", selectedDate);
+    if (selectedDate) {
+      fetchDoctors(selectedDate);
+    } else {
+      fetchDoctors();
+    }
+  });
 
   // Form submission
   document

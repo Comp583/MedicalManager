@@ -63,15 +63,6 @@
           <div class="booking-container">
             <form id="bookingForm">
               <div class="mb-3">
-                <label for="doctorSelect" class="form-label">Select Doctor</label>
-                <select class="form-select" id="doctorSelect" name="doctor" required>
-                  <option value="" disabled selected>Select a doctor</option>
-                  <th:block th:each="doctor : ${doctors}">
-                    <option th:value="${doctor.id}" th:text="${doctor.firstName + ' ' + doctor.lastName}"></option>
-                  </th:block>
-                </select>
-              </div>
-              <div class="mb-3">
                 <label for="appointmentDate" class="form-label">Date</label>
                 <input
                   type="text"
@@ -80,6 +71,15 @@
                   placeholder="YYYY-MM-DD"
                   required
                 />
+              </div>
+              <div class="mb-3">
+                <label for="doctorSelect" class="form-label">Select Doctor</label>
+                <select class="form-select" id="doctorSelect" name="doctor" required>
+                  <option value="" disabled selected>Select a doctor</option>
+                  <th:block th:each="doctor : ${doctors}">
+                    <option th:value="${doctor.id}" th:text="${doctor.firstName + ' ' + doctor.lastName}"></option>
+                  </th:block>
+                </select>
               </div>
               <div class="mb-3">
                 <label for="appointmentTime" class="form-label">Time</label>

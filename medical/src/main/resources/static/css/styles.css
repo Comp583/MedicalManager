@@ -251,3 +251,9 @@ header {
   border-radius: 8px;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.05);
 }
+
+.selected-date {
+  background-color: #007bff !important;
+  color: white !important;
+  border-radius: 0.25rem !important;
+}
