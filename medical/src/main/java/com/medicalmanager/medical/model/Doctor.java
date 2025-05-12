@@ -90,10 +90,10 @@ public class Doctor {
 
     //---------------  SLOTS & BREAKS ---------------
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AvailableSlot> availableSlots = new ArrayList<>();
 
-    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BreakTime> breakTimes = new ArrayList<>();
 
     //---------------  GETTERS & SETTERS  ---------------

@@ -3,6 +3,7 @@ package com.medicalmanager.medical.controller;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,23 +12,37 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import com.medicalmanager.medical.model.Patient;
+import com.medicalmanager.medical.model.Doctor;
+import com.medicalmanager.medical.repository.DoctorRepository;
 import com.medicalmanager.medical.service.PatientService;
 
 import jakarta.persistence.EntityNotFoundException;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/patient")
 public class PatientController {
+
+    private final PatientService patientService;
+    private final DoctorRepository doctorRepository;
+
+    public PatientController(PatientService patientService, DoctorRepository doctorRepository) {
+        this.patientService = patientService;
+        this.doctorRepository = doctorRepository;
+    }
 
     @GetMapping("/landing")
     public String patientLanding() {
         return "patient-landing";
     }
 
-    @GetMapping("/booking")
-    public String patientBooking() {
-        return "patient-booking";
-    }
+@GetMapping("/booking")
+public String patientBooking(Model model) {
+    List<Doctor> doctors = doctorRepository.findAll();
+    model.addAttribute("doctors", doctors);
+    return "patient-booking";
+}
 
     @GetMapping("/notifications")
     public String patientNotifications() {
@@ -35,14 +50,10 @@ public class PatientController {
     }
 
     @GetMapping("/manage")
-    public String patientDrView() {
+    public String patientDrView(Model model) {
+        List<Doctor> doctors = doctorRepository.findAll();
+        model.addAttribute("doctors", doctors);
         return "patient-doctorview";
-    }
-
-    private final PatientService patientService;
-
-    public PatientController(PatientService patientService) {
-        this.patientService = patientService;
     }
 
     @PostMapping

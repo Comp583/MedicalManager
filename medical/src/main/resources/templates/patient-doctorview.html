@@ -59,8 +59,8 @@
 
     <div class="container mt-4">
       <div class="calendar-box doctor-section">
-        <div class="section-title">Primary Dr.:</div>
-        <div class="doctor-card">
+        <div class="section-title">Doctors:</div>
+        <div th:each="doctor : ${doctors}" class="doctor-card">
           <div class="doctor-avatar">
             <svg
               width="20"
@@ -75,35 +75,10 @@
             </svg>
           </div>
           <div class="doctor-info">
-            <div class="description-label">Description</div>
-            <div class="description-text"></div>
+            <div class="description-label" th:text="${doctor.firstName + ' ' + doctor.lastName}">Doctor Name</div>
+            <div class="description-text" th:text="${doctor.biography}">Doctor Description</div>
           </div>
         </div>
-      </div>
-
-      <div class="appointments-box doctor-section">
-        <div class="section-title">Other Drs.:</div>
-        <div class="doctor-card">
-          <div class="doctor-avatar">
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <circle cx="12" cy="8" r="5"></circle>
-              <path d="M20 21v-2a7 7 0 0 0-14 0v2"></path>
-            </svg>
-          </div>
-          <div class="doctor-info">
-            <div class="description-label">Description</div>
-            <div class="description-text"></div>
-          </div>
-          <div class="change-dr-btn">Change Dr</div>
-        </div>
-        <div class="arrow-down"></div>
       </div>
     </div>
 

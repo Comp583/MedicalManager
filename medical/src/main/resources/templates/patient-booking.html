@@ -20,9 +20,7 @@
         <div class="d-flex justify-content-center flex-grow-1">
           <a class="nav-link" th:href="@{/patient/landing}">Home</a>
           <a class="nav-link active" th:href="@{/patient/booking}">Book</a>
-          <a class="nav-link" th:href="@{/patient/notifications}"
-            >Notifications</a
-          >
+          <a class="nav-link" th:href="@{/patient/notifications}">Notifications</a>
           <a class="nav-link" th:href="@{/patient/manage}">Manage Dr</a>
         </div>
         <div class="dropdown ms-3">
@@ -65,11 +63,12 @@
           <div class="booking-container">
             <form id="bookingForm">
               <div class="mb-3">
-                <label for="doctorSelect" class="form-label"
-                  >Select Doctor</label
-                >
-                <select class="form-select" id="doctorSelect" required>
+                <label for="doctorSelect" class="form-label">Select Doctor</label>
+                <select class="form-select" id="doctorSelect" name="doctor" required>
                   <option value="" disabled selected>Select a doctor</option>
+                  <th:block th:each="doctor : ${doctors}">
+                    <option th:value="${doctor.id}" th:text="${doctor.firstName + ' ' + doctor.lastName}"></option>
+                  </th:block>
                 </select>
               </div>
               <div class="mb-3">
@@ -89,9 +88,7 @@
                 </select>
               </div>
               <div class="mb-3">
-                <label for="appointmentType" class="form-label"
-                  >Appointment Type</label
-                >
+                <label for="appointmentType" class="form-label">Appointment Type</label>
                 <select class="form-select" id="appointmentType" required>
                   <option value="" disabled selected>Select type</option>
                   <option value="check-up">Check-up</option>
@@ -100,9 +97,7 @@
                 </select>
               </div>
               <div class="mb-3">
-                <label for="reasonForVisit" class="form-label"
-                  >Reason for Visit</label
-                >
+                <label for="reasonForVisit" class="form-label">Reason for Visit</label>
                 <textarea
                   class="form-control"
                   id="reasonForVisit"
