@@ -1,9 +1,7 @@
 document.addEventListener("DOMContentLoaded", function () {
   // Get CSRF token if using Spring Security
   const csrfToken = document.querySelector('meta[name="_csrf"]')?.content;
-  const csrfHeader = document.querySelector(
-    'meta[name="_csrf_header"]'
-  )?.content;
+  const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.content;
 
   // Initialize calendar
   const calendarEl = document.getElementById("calendar");
@@ -27,9 +25,7 @@ document.addEventListener("DOMContentLoaded", function () {
         selectedDateCell.classList.remove("selected-date");
       }
       // Find the clicked date cell element by data-date attribute
-      const newSelectedCell = calendarEl.querySelector(
-        `[data-date="${info.dateStr}"]`
-      );
+      const newSelectedCell = calendarEl.querySelector(`[data-date="${info.dateStr}"]`);
       if (newSelectedCell) {
         newSelectedCell.classList.add("selected-date");
         selectedDateCell = newSelectedCell;
@@ -70,8 +66,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const doctors = await response.json();
       const doctorSelect = document.getElementById("doctorSelect");
-      doctorSelect.innerHTML =
-        '<option value="" disabled selected>Select a doctor</option>';
+      doctorSelect.innerHTML = '<option value="" disabled selected>Select a doctor</option>';
 
       doctors.forEach((doc) => {
         const option = document.createElement("option");
@@ -86,22 +81,28 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Listen for changes on appointmentDate input to fetch doctors for selected date
-  document.getElementById("appointmentDate").addEventListener("change", (e) => {
-    const selectedDate = e.target.value;
-    console.log("Date input changed:", selectedDate);
-    if (selectedDate) {
-      fetchDoctors(selectedDate);
-      fetchAvailableSlots();
-    } else {
-      fetchDoctors();
-      clearTimeSlots();
-    }
-  });
+  const appointmentDateInput = document.getElementById("appointmentDate");
+  if (appointmentDateInput) {
+    appointmentDateInput.addEventListener("change", (e) => {
+      const selectedDate = e.target.value;
+      console.log("Date input changed:", selectedDate);
+      if (selectedDate) {
+        fetchDoctors(selectedDate);
+        fetchAvailableSlots();
+      } else {
+        fetchDoctors();
+        clearTimeSlots();
+      }
+    });
+  }
 
   // Listen for changes on doctorSelect to fetch available slots
-  document.getElementById("doctorSelect").addEventListener("change", (e) => {
-    fetchAvailableSlots();
-  });
+  const doctorSelectInput = document.getElementById("doctorSelect");
+  if (doctorSelectInput) {
+    doctorSelectInput.addEventListener("change", (e) => {
+      fetchAvailableSlots();
+    });
+  }
 
   async function fetchAvailableSlots() {
     const doctorSelect = document.getElementById("doctorSelect");
@@ -142,9 +143,9 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Form submission
-  document
-    .getElementById("bookingForm")
-    .addEventListener("submit", async (e) => {
+  const bookingForm = document.getElementById("bookingForm");
+  if (bookingForm) {
+    bookingForm.addEventListener("submit", async (e) => {
       e.preventDefault();
 
       const date = document.getElementById("appointmentDate").value;
@@ -201,36 +202,89 @@ document.addEventListener("DOMContentLoaded", function () {
         }
 
         showSuccess("Appointment booked successfully!");
-        document.getElementById("bookingForm").reset();
+        bookingForm.reset();
         calendar.refetchEvents();
       } catch (error) {
         console.error("Booking error:", error);
         showError(error.message);
       }
     });
+  }
 
-    document.addEventListener("DOMContentLoaded", function () {
-    const bookingForm = document.getElementById("bookingForm");
-    const bookButton = bookingForm.querySelector("button[type='submit']");
+  // Add event listeners for Edit and Cancel buttons using event delegation
+  const appointmentsList = document.querySelector(".appointments-box ul");
+  if (appointmentsList) {
+    appointmentsList.addEventListener("click", async (e) => {
+      const editButton = e.target.closest(".edit-appointment-btn");
+      const cancelButton = e.target.closest(".cancel-appointment-btn");
 
-    bookButton.addEventListener("click", (e) => {
-      const date = document.getElementById("appointmentDate").value;
-      const time = document.getElementById("appointmentTime").value;
-      const doctorId = document.getElementById("doctorSelect").value;
-      const appointmentType = document.getElementById("appointmentType").value;
-      const reasonForVisit = document.getElementById("reasonForVisit").value;
+      if (editButton) {
+        const appointmentId = editButton.getAttribute("data-appointment-id");
+        const newDateTime = prompt("Enter new date and time (YYYY-MM-DDTHH:mm):");
+        if (!newDateTime) {
+          alert("Reschedule cancelled.");
+          return;
+        }
 
-      console.log("Book button clicked. Current inputs:");
-      console.log({
-        date,
-        time,
-        doctorId,
-        appointmentType,
-        reasonForVisit,
-      });
+        try {
+          const headers = {
+            "Content-Type": "application/json",
+          };
+          if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+          }
+
+          const url = `/api/appointments/${appointmentId}/reschedule?newDateTime=${encodeURIComponent(newDateTime)}`;
+          const response = await fetch(url, {
+            method: "PUT",
+            headers: headers,
+          });
+
+          if (!response.ok) {
+            let errorMessage = "Reschedule failed";
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorMessage;
+            } catch (e) {}
+            throw new Error(errorMessage);
+          }
+
+          alert("Appointment rescheduled successfully.");
+          location.reload();
+        } catch (error) {
+          console.error("Reschedule error:", error);
+          alert(error.message);
+        }
+      } else if (cancelButton) {
+        const appointmentId = cancelButton.getAttribute("data-appointment-id");
+        console.log("Cancel button clicked for appointmentId:", appointmentId);
+
+        // Remove appointment from Upcoming Appointments list
+        const appointmentListItem = document.querySelector(`.appointments-box ul li[data-appointment-id="${appointmentId}"]`);
+        console.log("Appointment list item found:", appointmentListItem);
+        if (appointmentListItem) {
+          appointmentListItem.remove();
+        } else {
+          console.warn("Appointment list item not found for id:", appointmentId);
+        }
+
+        // Remove appointment from FullCalendar
+        let event = calendar.getEventById(appointmentId);
+        if (!event) {
+          // Fallback: find event by matching extendedProps.appointmentId or other property
+          event = calendar.getEvents().find(ev => ev.extendedProps && ev.extendedProps.appointmentId == appointmentId);
+        }
+        console.log("FullCalendar event found:", event);
+        if (event) {
+          event.remove();
+        } else {
+          console.warn("FullCalendar event not found for id:", appointmentId);
+        }
+
+        alert("Appointment cancelled successfully.");
+      }
     });
-  });
-
+  }
 
   // Initialize
   fetchDoctors();

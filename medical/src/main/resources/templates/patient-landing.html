@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Bright Sight Optometry - Client Dashboard</title>
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -24,9 +26,7 @@
         <div class="d-flex justify-content-center flex-grow-1">
           <a class="nav-link active" th:href="@{/patient/landing}">Home</a>
           <a class="nav-link" th:href="@{/patient/booking}">Book</a>
-          <a class="nav-link" th:href="@{/patient/notifications}"
-            >Notifications</a
-          >
+          <a class="nav-link" th:href="@{/patient/notifications}">Notifications</a>
           <a class="nav-link" th:href="@{/patient/manage}">Manage Dr</a>
         </div>
         <div class="dropdown ms-3">
@@ -73,21 +73,21 @@
           <div class="appointments-box">
             <h6>Upcoming Appointments</h6>
             <ul class="list-group list-group-flush" th:if="${appointments}">
-              <li class="list-group-item" th:each="appointment : ${appointments}">
+              <li class="list-group-item d-flex justify-content-between align-items-center" th:each="appointment : ${appointments}" th:data-appointment-id="${appointment.id}">
                 <div>
                   <strong th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}">Doctor Name</strong>
                   <span> - </span>
                   <span th:text="${appointment.dateTime != null} ? ${#temporals.format(appointment.dateTime, 'MMM dd, yyyy HH:mm')} : 'N/A'">Date Time</span>
+                  <div>
+                    <small th:text="${appointment.appointmentType}">Appointment Type</small>
+                  </div>
                 </div>
                 <div>
-                  <small th:text="${appointment.appointmentType}">Appointment Type</small>
+                  <button type="button" class="btn btn-sm btn-primary edit-appointment-btn" th:data-appointment-id="${appointment.id}">Edit</button>
+                  <button type="button" class="btn btn-sm btn-danger cancel-appointment-btn" th:data-appointment-id="${appointment.id}">Cancel</button>
                 </div>
               </li>
             </ul>
-            <div class="mt-3 text-end" th:if="${appointments}">
-              <button class="btn btn-outline-primary btn-small">Edit</button>
-              <button class="btn btn-outline-danger btn-small">Cancel</button>
-            </div>
           </div>
         </div>
       </div>
@@ -95,52 +95,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const calendarEl = document.getElementById("calendar");
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: "dayGridMonth",
-          height: 500,
-          eventDidMount: function (info) {
-            const tooltip = document.createElement("div");
-            tooltip.innerText = info.event.title;
-            tooltip.style.position = "absolute";
-            tooltip.style.backgroundColor = "#fff";
-            tooltip.style.border = "1px solid #ccc";
-            tooltip.style.padding = "5px";
-            tooltip.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-            tooltip.style.zIndex = 9999;
-            tooltip.style.opacity = 1;
-            tooltip.classList.add("fc-tooltip");
-
-            info.el.addEventListener("mouseenter", function (e) {
-              document.body.appendChild(tooltip);
-              tooltip.style.top = e.pageY + 10 + "px";
-              tooltip.style.left = e.pageX + 10 + "px";
-            });
-
-            info.el.addEventListener("mousemove", function (e) {
-              tooltip.style.top = e.pageY + 10 + "px";
-              tooltip.style.left = e.pageX + 10 + "px";
-            });
-
-            info.el.addEventListener("mouseleave", function () {
-              tooltip.remove();
-            });
-          },
-          events: [
-            {
-              title: "Dr. Smith - 10:30 AM",
-              start: "2025-04-15",
-            },
-            {
-              title: "Dr. Lee - 2:00 PM",
-              start: "2025-04-17",
-            },
-          ],
-        });
-        calendar.render();
-      });
-    </script>
+    <script th:src="@{/js/clientBooking.js}"></script>
   </body>
 </html>
