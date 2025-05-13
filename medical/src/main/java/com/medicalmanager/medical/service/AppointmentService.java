@@ -94,4 +94,24 @@ public class AppointmentService {
 
         return appointmentRepository.findByPatientId(patientOptional.get().getId());
     }
+
+    public Appointment rescheduleAppointment(Long id, AppointmentRequest request) {
+        Appointment existing = appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+
+        // Update appointment details (assuming request contains new time/date)
+        existing.setAppointmentDate(request.getAppointmentDate());
+        existing.setAppointmentTime(request.getAppointmentTime());
+
+        // Optional: validate availability again like in bookAppointment()
+        return appointmentRepository.save(existing);
+    }
+
+    public void cancelAppointment(Long id) {
+        Appointment existing = appointmentRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Appointment not found"));
+
+        appointmentRepository.delete(existing);
+    }
+
 }

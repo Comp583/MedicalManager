@@ -42,6 +42,8 @@ public class Appointment {
     @Column
     private String notes;
 
+    private LocalTime appointmentTime;
+
     // Getters and Setters
 
     public Long getId() {
@@ -74,6 +76,14 @@ public class Appointment {
 
     public void setAppointmentDate(LocalDate appointmentDate) {
         this.appointmentDate = appointmentDate;
+    }
+
+    public LocalTime getAppointmentTime() {
+        return appointmentTime;
+    }
+
+    public void setAppointmentTime(LocalTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 
     public LocalTime getStartTime() {
