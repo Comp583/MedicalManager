@@ -2,7 +2,6 @@ package com.medicalmanager.medical.controller;
 
 import java.time.LocalTime;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
@@ -37,7 +36,6 @@ public class AdminController {
     private final PasswordEncoder passwordEncoder;
     private final DoctorService doctorService;
 
-    @Autowired
     public AdminController(DoctorRepository doctorRepo,
             UserRepository userRepo,
             PasswordEncoder passwordEncoder, DoctorService doctorService) {

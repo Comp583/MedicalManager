@@ -6,7 +6,6 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import com.medicalmanager.medical.model.AvailableSlot;
 import com.medicalmanager.medical.model.Doctor;
 
 @Repository

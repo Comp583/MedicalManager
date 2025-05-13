@@ -3,7 +3,6 @@ package com.medicalmanager.medical.controller;
 
 import com.medicalmanager.medical.dto.AvailabilityDto;
 import com.medicalmanager.medical.service.AvailabilityService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,7 +17,6 @@ public class AvailabilityController {
 
     private final AvailabilityService availabilityService;
 
-    @Autowired
     public AvailabilityController(AvailabilityService availabilityService) {
         this.availabilityService = availabilityService;
     }

@@ -10,21 +10,12 @@ import com.medicalmanager.medical.repository.AppointmentRepository;
 import com.medicalmanager.medical.repository.DoctorRepository;
 import com.medicalmanager.medical.repository.PatientRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.transaction.annotation.Transactional;
 
 import org.springframework.stereotype.Service;
 
-import jakarta.persistence.EntityNotFoundException;
-
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -35,7 +26,6 @@ public class AppointmentService {
     private final PatientRepository patientRepository;
     private final UserDetailsServiceImpl userService;
 
-    @Autowired
     public AppointmentService(
             AppointmentRepository appointmentRepository,
             DoctorRepository doctorRepository,

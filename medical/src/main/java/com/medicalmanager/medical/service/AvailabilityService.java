@@ -8,7 +8,6 @@ import com.medicalmanager.medical.model.Doctor;
 import com.medicalmanager.medical.repository.AppointmentRepository;
 import com.medicalmanager.medical.repository.DoctorRepository;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
@@ -29,7 +28,6 @@ public class AvailabilityService {
     private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final int MIN_SLOT_DURATION = 15; // Minimum appointment duration in minutes
 
-    @Autowired
     public AvailabilityService(DoctorRepository doctorRepository,
             AppointmentRepository appointmentRepository) {
         this.doctorRepository = doctorRepository;

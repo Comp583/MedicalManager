@@ -19,6 +19,9 @@ public class User {
     @Column(nullable = false)
     private String role;
 
+    @Column(nullable = false)
+    private String email;
+
     // Getters and setters
     public Long getId() {
         return id;
@@ -50,5 +53,13 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getEmail(String email) {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
