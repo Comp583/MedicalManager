@@ -63,10 +63,21 @@ public String patientBooking(Model model) {
     return "patient-booking";
 }
 
-    @GetMapping("/notifications")
-    public String patientNotifications() {
-        return "patient-notifications";
+@GetMapping("/notifications")
+public String patientNotifications(Model model) {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+    String username = authentication.getName();
+
+    Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
+    if (patientOpt.isPresent()) {
+        Patient patient = patientOpt.get();
+        List<Appointment> bookedAppointments = appointmentService.getPatientAppointments(patient.getId());
+        model.addAttribute("bookedAppointments", bookedAppointments);
+    } else {
+        model.addAttribute("bookedAppointments", List.of());
     }
+    return "patient-notifications";
+}
 
     @GetMapping("/manage")
     public String patientDrView(Model model) {

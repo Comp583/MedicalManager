@@ -65,16 +65,30 @@
         </div>
 
         <div class="notification-item">
-          <input type="checkbox" class="checkbox" />
           <div class="notification-content">
             <div class="notification-title">Appointment booked!</div>
-            <div class="notification-details">Details...</div>
+            <div class="notification-details" th:if="${bookedAppointments}">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="appointment : ${bookedAppointments}" th:data-appointment-id="${appointment.id}">
+                  <div>
+                    <strong th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}">Doctor Name</strong>
+                    <span> - </span>
+                    <span th:text="${appointment.dateTime != null} ? ${#temporals.format(appointment.dateTime, 'MMM dd, yyyy HH:mm')} : 'N/A'">Date Time</span>
+                    <div>
+                      <small th:text="${appointment.appointmentType}">Appointment Type</small>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="notification-details" th:if="${#lists.isEmpty(bookedAppointments)}">
+              No appointments booked.
+            </div>
           </div>
-          <div class="date">Date</div>
+<div class="date" th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'MMM dd, yyyy')}">Date</div>
         </div>
 
         <div class="notification-item">
-          <input type="checkbox" class="checkbox" />
           <div class="notification-content">
             <div class="notification-title">Dr. requested change</div>
             <div class="notification-details">Details...</div>
