@@ -3,8 +3,10 @@ package com.medicalmanager.medical.config;
 import com.medicalmanager.medical.model.User;
 import com.medicalmanager.medical.model.Doctor;
 import com.medicalmanager.medical.model.AvailableSlot;
+import com.medicalmanager.medical.model.Patient;
 import com.medicalmanager.medical.repository.UserRepository;
 import com.medicalmanager.medical.repository.DoctorRepository;
+import com.medicalmanager.medical.repository.PatientRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Component;
 
 import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -24,6 +27,9 @@ public class DataInitializer implements CommandLineRunner {
 
     @Autowired
     private DoctorRepository doctorRepository;
+
+    @Autowired
+    private PatientRepository patientRepository;
 
     @Autowired
     private PasswordEncoder passwordEncoder;
@@ -39,20 +45,16 @@ public class DataInitializer implements CommandLineRunner {
             userRepository.save(patient);
         }
 
-        /*if (userRepository.findByUsername("tempdoctor").isEmpty()) {
-            User doctor = new User();
-            doctor.setUsername("tempdoctor");
-            doctor.setPassword(passwordEncoder.encode("doctor123"));
-            doctor.setRole("DOCTOR");
-            userRepository.save(doctor);
+        // Create Patient entity for tempclient if not exists
+        if (patientRepository.findByUsername("tempclient").isEmpty()) {
+            Patient patientEntity = new Patient();
+            patientEntity.setUsername("tempclient");
+            patientEntity.setFirstName("Temp");
+            patientEntity.setLastName("Client");
+            patientEntity.setCreatedAt(LocalDateTime.now());
+            patientRepository.save(patientEntity);
         }
-        if (userRepository.findByUsername("tempadmin").isEmpty()) {
-            User admin = new User();
-            admin.setUsername("tempadmin");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setRole("ADMIN");
-            userRepository.save(admin);
-        }*/
+
         ////Only ever will be us admins
         if (userRepository.findByUsername("nic_admin").isEmpty()) {
             User nicAdmin = new User();

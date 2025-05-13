@@ -72,11 +72,19 @@
         <div class="col-md-6">
           <div class="appointments-box">
             <h6>Upcoming Appointments</h6>
-            <ul class="list-group list-group-flush">
-              <li class="list-group-item">Dr. Smith — Mon, 10:30 AM</li>
-              <li class="list-group-item">Dr. Lee — Tue, 2:00 PM</li>
+            <ul class="list-group list-group-flush" th:if="${appointments}">
+              <li class="list-group-item" th:each="appointment : ${appointments}">
+                <div>
+                  <strong th:text="${appointment.doctor.firstName} + ' ' + ${appointment.doctor.lastName}">Doctor Name</strong>
+                  <span> - </span>
+                  <span th:text="${appointment.dateTime != null} ? ${#temporals.format(appointment.dateTime, 'MMM dd, yyyy HH:mm')} : 'N/A'">Date Time</span>
+                </div>
+                <div>
+                  <small th:text="${appointment.appointmentType}">Appointment Type</small>
+                </div>
+              </li>
             </ul>
-            <div class="mt-3 text-end">
+            <div class="mt-3 text-end" th:if="${appointments}">
               <button class="btn btn-outline-primary btn-small">Edit</button>
               <button class="btn btn-outline-danger btn-small">Cancel</button>
             </div>

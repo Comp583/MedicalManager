@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.HashMap;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -19,19 +21,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.medicalmanager.medical.dto.AppointmentRequest;
 import com.medicalmanager.medical.model.Appointment;
+import com.medicalmanager.medical.model.Patient;
 import com.medicalmanager.medical.service.AppointmentService;
+import com.medicalmanager.medical.service.PatientService;
 
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.web.bind.annotation.RestController;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
 @RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
     private final AppointmentService appointmentService;
+    private final PatientService patientService;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, PatientService patientService) {
         this.appointmentService = appointmentService;
+        this.patientService = patientService;
     }
 
     @PostMapping
@@ -60,6 +69,31 @@ public class AppointmentController {
         System.out.println("Appointment Type: " + request.getAppointmentType());
         System.out.println("Reason for Visit: " + request.getReasonForVisit());
         return ResponseEntity.ok("Logged appointment data successfully");
+    }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<List<Map<String, Object>>> getPatientCalendarAppointments() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        // Use patientService to get patient by username
+        Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
+        if (patientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Patient patient = patientOpt.get();
+
+        List<Appointment> appointments = appointmentService.getPatientAppointments(patient.getId());
+
+        // Map appointments to calendar event format
+        List<Map<String, Object>> events = appointments.stream().map(appointment -> {
+            Map<String, Object> event = new HashMap<>();
+            event.put("title", appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName() + " - " + appointment.getDateTime().toLocalTime().toString());
+            event.put("start", appointment.getDateTime().toLocalDate().toString());
+            return event;
+        }).toList();
+
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/doctor/{doctorId}")

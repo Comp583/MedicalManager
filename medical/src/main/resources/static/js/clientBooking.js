@@ -160,6 +160,18 @@ document.addEventListener("DOMContentLoaded", function () {
         reasonForVisit: document.getElementById("reasonForVisit").value,
       };
 
+      // Print inputs to console on Book button click
+      console.log("Booking form inputs:", {
+        date,
+        time,
+        doctorId: formData.doctorId,
+        patientId: formData.patientId,
+        dateTime: formData.dateTime,
+        duration: formData.duration,
+        appointmentType: formData.appointmentType,
+        reasonForVisit: formData.reasonForVisit,
+      });
+
       console.log("Booking form data:", formData);
 
       try {
@@ -170,7 +182,8 @@ document.addEventListener("DOMContentLoaded", function () {
           headers[csrfHeader] = csrfToken;
         }
 
-        const response = await fetch("/api/appointments/log", {
+        // Changed endpoint from /api/appointments/log to /api/appointments for actual booking
+        const response = await fetch("/api/appointments", {
           method: "POST",
           headers: headers,
           body: JSON.stringify(formData),
@@ -195,6 +208,29 @@ document.addEventListener("DOMContentLoaded", function () {
         showError(error.message);
       }
     });
+
+    document.addEventListener("DOMContentLoaded", function () {
+    const bookingForm = document.getElementById("bookingForm");
+    const bookButton = bookingForm.querySelector("button[type='submit']");
+
+    bookButton.addEventListener("click", (e) => {
+      const date = document.getElementById("appointmentDate").value;
+      const time = document.getElementById("appointmentTime").value;
+      const doctorId = document.getElementById("doctorSelect").value;
+      const appointmentType = document.getElementById("appointmentType").value;
+      const reasonForVisit = document.getElementById("reasonForVisit").value;
+
+      console.log("Book button clicked. Current inputs:");
+      console.log({
+        date,
+        time,
+        doctorId,
+        appointmentType,
+        reasonForVisit,
+      });
+    });
+  });
+
 
   // Initialize
   fetchDoctors();
