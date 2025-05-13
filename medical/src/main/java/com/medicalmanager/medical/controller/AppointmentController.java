@@ -37,12 +37,15 @@ public class AppointmentController {
 
     private final AppointmentService appointmentService;
     private final AvailabilityService availabilityService;
+    private final AppointmentRepository appointmentRepository;
 
     @Autowired
     public AppointmentController(AppointmentService appointmentService,
-            AvailabilityService availabilityService) {
+            AvailabilityService availabilityService,
+            AppointmentRepository appointmentRepository) {
         this.appointmentService = appointmentService;
         this.availabilityService = availabilityService;
+        this.appointmentRepository = appointmentRepository;
     }
 
     @GetMapping("/availability/{doctorId}")
@@ -66,12 +69,17 @@ public class AppointmentController {
                     appointmentRequest.getDoctorId(),
                     appointmentRequest.getAppointmentDate());
 
+            // Calculate end time (assuming default 30 minute duration)
+            LocalTime startTime = appointmentRequest.getAppointmentTime();
+            LocalTime endTime = startTime.plusMinutes(30);
+
             // Verify the requested time is available
             boolean slotAvailable = availableSlots.stream()
-                    .anyMatch(slot -> slot.getStartTime()
-                            .equals(appointmentRequest.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm"))) &&
-                            slot.getEndTime().equals(
-                                    appointmentRequest.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm"))));
+                    .anyMatch(slot -> {
+                        LocalTime slotStart = LocalTime.parse(slot.getStartTime());
+                        LocalTime slotEnd = LocalTime.parse(slot.getEndTime());
+                        return !startTime.isBefore(slotStart) && !endTime.isAfter(slotEnd);
+                    });
 
             if (!slotAvailable) {
                 throw new IllegalStateException("The requested time slot is no longer available");
@@ -88,9 +96,6 @@ public class AppointmentController {
                     .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
-
-    @Autowired
-    private AppointmentRepository appointmentRepository;
 
     @GetMapping("/patient/{patientId}")
     public ResponseEntity<?> getPatientAppointments(@PathVariable Long patientId) {
