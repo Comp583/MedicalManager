@@ -50,7 +50,8 @@ public class AvailabilityService {
                 .collect(Collectors.toList());
 
         // Get all appointments for the doctor on this date
-        List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentDate(doctorId, date);
+        List<Appointment> appointments = appointmentRepository.findByDoctorIdAndAppointmentDate(doctorId, startDate,
+                endDate);
 
         List<AvailabilityDto> result = new ArrayList<>();
 

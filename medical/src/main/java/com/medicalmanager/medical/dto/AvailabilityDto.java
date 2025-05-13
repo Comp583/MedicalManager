@@ -1,44 +1,33 @@
 //Transfers available time slots data from backend to frontend
 package com.medicalmanager.medical.dto;
 
-import java.time.DayOfWeek;
 import java.time.LocalTime;
 
 public class AvailabilityDto {
-    private DayOfWeek day;
-    private LocalTime start;
-    private LocalTime end;
-    private Boolean off = true;
+    private String startTime;
+    private String endTime;
 
-    public DayOfWeek getDay() {
-        return day;
+    public AvailabilityDto() {
     }
 
-    public void setDay(DayOfWeek d) {
-        this.day = d;
+    public AvailabilityDto(String startTime, String endTime) {
+        this.startTime = startTime;
+        this.endTime = endTime;
     }
 
-    public LocalTime getStart() {
-        return start;
+    public String getStartTime() {
+        return startTime;
     }
 
-    public void setStart(LocalTime s) {
-        this.start = s;
+    public void setStartTime(String startTime) {
+        this.startTime = startTime;
     }
 
-    public LocalTime getEnd() {
-        return end;
+    public String getEndTime() {
+        return endTime;
     }
 
-    public void setEnd(LocalTime e) {
-        this.end = e;
-    }
-
-    public Boolean getOff() {
-        return off;
-    }
-
-    public void setOff(Boolean o) {
-        this.off = o;
+    public void setEndTime(String endTime) {
+        this.endTime = endTime;
     }
 }

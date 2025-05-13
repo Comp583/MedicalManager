@@ -9,6 +9,8 @@ public class AppointmentRequest {
     private Long doctorId;
     private Long patientId;
     private LocalDateTime dateTime;
+    private LocalDate appointmentDate;
+    private LocalTime appointmentTime;
     private Integer duration;
     private String appointmentType;
     private String reasonForVisit;
@@ -35,6 +37,22 @@ public class AppointmentRequest {
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
+    }
+
+    public LocalDate getAppointmentDate() {
+        return appointmentDate;
+    }
+
+    public void setAppointmentDate(LocalDate appointmentDate) {
+        this.appointmentDate = appointmentDate;
+    }
+
+    public LocalTime getAppointmentTime() {
+        return appointmentTime;
+    }
+
+    public void setAppointmentTime(LocalTime appointmentTime) {
+        this.appointmentTime = appointmentTime;
     }
 
     public Integer getDuration() {

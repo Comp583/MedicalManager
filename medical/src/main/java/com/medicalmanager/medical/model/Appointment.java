@@ -2,6 +2,8 @@
 package com.medicalmanager.medical.model;
 
 import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,18 +14,33 @@ public class Appointment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id")
+    @JoinColumn(name = "doctor_id", nullable = false)
     private Doctor doctor;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id")
+    @JoinColumn(name = "patient_id", nullable = false)
     private Patient patient;
+
+    @Column(nullable = false)
+    private LocalDate appointmentDate;
+
+    @Column(nullable = false)
+    private LocalTime startTime;
+
+    @Column(nullable = false)
+    private LocalTime endTime;
+
+    @Column(nullable = false)
+    private String appointmentType;
+
+    @Column(name = "reason_for_visit")
+    private String reasonForVisit;
+
+    @Column
+    private String status; // "SCHEDULED", "COMPLETED", "CANCELLED"
 
     private LocalDateTime dateTime;
     private Integer duration; // in minutes
-    private String status;
-    private String appointmentType;
-    private String reasonForVisit;
     private String notes;
 
     @Column(name = "previous_appointment_id")
@@ -34,103 +51,104 @@ public class Appointment {
         return id;
     }
 
-    public Doctor getDoctor() {
-        return doctor;
-    }
-
-    public Patient getPatient() {
-        return patient;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public String getAppointmentType() {
-        return appointmentType;
-    }
-
-    public String getReasonForVisit() {
-        return reasonForVisit;
-    }
-
-    public String getNotes() {
-        return notes;
-    }
-
-    public Long getPreviousAppointmentId() {
-        return previousAppointmentId;
-    }
-
-    // Setters
     public void setId(Long id) {
         this.id = id;
+    }
+
+    public Doctor getDoctor() {
+        return doctor;
     }
 
     public void setDoctor(Doctor doctor) {
         this.doctor = doctor;
     }
 
+    public Patient getPatient() {
+        return patient;
+    }
+
     public void setPatient(Patient patient) {
         this.patient = patient;
+    }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
     }
 
     public void setDateTime(LocalDateTime dateTime) {
         this.dateTime = dateTime;
     }
 
+    public Integer getDuration() {
+        return duration;
+    }
+
     public void setDuration(Integer duration) {
         this.duration = duration;
+    }
+
+    public LocalDate getAppointmentDate() {
+        return appointmentDate;
+    }
+
+    public void setAppointmentDate(LocalDate appointmentDate) {
+        this.appointmentDate = appointmentDate;
+    }
+
+    public LocalTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalTime getEndTime() {
+        return endTime;
+    }
+
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public String getStatus() {
+        return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
     }
 
+    public String getAppointmentType() {
+        return appointmentType;
+    }
+
     public void setAppointmentType(String appointmentType) {
         this.appointmentType = appointmentType;
+    }
+
+    public String getReasonForVisit() {
+        return reasonForVisit;
     }
 
     public void setReasonForVisit(String reasonForVisit) {
         this.reasonForVisit = reasonForVisit;
     }
 
+    public String getNotes() {
+        return notes;
+    }
+
     public void setNotes(String notes) {
         this.notes = notes;
+    }
+
+    public Long getPreviousAppointmentId() {
+        return previousAppointmentId;
     }
 
     public void setPreviousAppointmentId(Long previousAppointmentId) {
         this.previousAppointmentId = previousAppointmentId;
     }
-
-    // Business logic methods
-    public LocalDateTime getEndTime() {
-        return dateTime != null && duration != null
-                ? dateTime.plusMinutes(duration)
-                : null;
-    }
-
-    /*
-     * @Override
-     * public String toString() {
-     * return "Appointment{" +
-     * "id=" + id +
-     * ", doctorId=" + (doctor != null ? doctor.getId() : null) +
-     * ", patientId=" + (patient != null ? patient.getId() : null) +
-     * ", dateTime=" + dateTime +
-     * ", duration=" + duration +
-     * ", status='" + status + '\'' +
-     * ", type='" + appointmentType + '\'' +
-     * '}';
-     * }
-     */
 
 }
