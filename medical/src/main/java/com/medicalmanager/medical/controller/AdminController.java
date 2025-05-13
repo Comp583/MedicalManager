@@ -1,5 +1,7 @@
 package com.medicalmanager.medical.controller;
 
+import java.time.LocalTime;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,16 +33,16 @@ import jakarta.validation.Valid;
 public class AdminController {
 
     private final DoctorRepository doctorRepo;
-    private final UserRepository   userRepo;
-    private final PasswordEncoder  passwordEncoder;
+    private final UserRepository userRepo;
+    private final PasswordEncoder passwordEncoder;
     private final DoctorService doctorService;
 
     @Autowired
     public AdminController(DoctorRepository doctorRepo,
-                           UserRepository   userRepo,
-                           PasswordEncoder  passwordEncoder, DoctorService doctorService) {
-        this.doctorRepo      = doctorRepo;
-        this.userRepo        = userRepo;
+            UserRepository userRepo,
+            PasswordEncoder passwordEncoder, DoctorService doctorService) {
+        this.doctorRepo = doctorRepo;
+        this.userRepo = userRepo;
         this.passwordEncoder = passwordEncoder;
         this.doctorService = doctorService;
     }
@@ -70,7 +72,7 @@ public class AdminController {
     @GetMapping("/managedrs/edit/{id}")
     public String editDoctorForm(@PathVariable Long id, Model model) {
         Doctor d = doctorRepo.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         DoctorForm form = DoctorForm.fromDoctor(d);
         model.addAttribute("doctorForm", form);
         model.addAttribute("editing", true);
@@ -82,30 +84,29 @@ public class AdminController {
     @ResponseBody
     public DoctorForm doctorJson(@PathVariable Long id) {
         Doctor d = doctorRepo.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return DoctorForm.fromDoctor(d);
     }
 
     @PutMapping("/managedrs/edit/{id}")
     public String updateDoctor(
-        @PathVariable Long id,
-        @ModelAttribute("doctorForm") @Valid DoctorForm form,
-        BindingResult br,
-        Model model
-    ) {
+            @PathVariable Long id,
+            @ModelAttribute("doctorForm") @Valid DoctorForm form,
+            BindingResult br,
+            Model model) {
         if (br.hasErrors()) {
             model.addAttribute("doctors", doctorRepo.findAll());
             model.addAttribute("editing", true);
             return "admin-managedrs";
         }
         Doctor d = doctorRepo.findById(id)
-            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         form.updateDoctor(d, passwordEncoder);
         doctorRepo.save(d);
-        //if the password was changed, also update userRepo here
+        // if the password was changed, also update userRepo here
         return "redirect:/admin/managedrs";
     }
-    
+
     @DeleteMapping("/managedrs/delete/{id}")
     public String deleteDoctor(@PathVariable Long id) {
         doctorService.deleteDoctorAndUser(id);
@@ -114,10 +115,9 @@ public class AdminController {
 
     @PostMapping("/managedrs/add")
     public String addDoctor(
-        @ModelAttribute("doctorForm") @Valid DoctorForm form,
-        BindingResult br,
-        Model model
-    ) {
+            @ModelAttribute("doctorForm") @Valid DoctorForm form,
+            BindingResult br,
+            Model model) {
         if (br.hasErrors()) {
             model.addAttribute("doctors", doctorRepo.findAll());
             model.addAttribute("editing", false);
@@ -127,11 +127,12 @@ public class AdminController {
         Doctor d = form.toDoctor(passwordEncoder);
         d.getRoles().add("ROLE_DOCTOR");
         form.getAvailabilities().stream()
-            .filter(av -> Boolean.FALSE.equals(av.getOff()))
-            .forEach(av ->
-                d.getAvailability().put(av.getDay(),
-                    LocalTimeRange.of(av.getStart(), av.getEnd()))
-            );
+                .filter(av -> Boolean.FALSE.equals(av.getOff()))
+                .forEach(av -> d.getAvailability().put(av.getDay(),
+                        LocalTimeRange.of(
+                                LocalTime.parse(av.getStartTime()), // Convert String to LocalTime
+                                LocalTime.parse(av.getEndTime()) // Convert String to LocalTime
+                        )));
         doctorRepo.save(d);
 
         User u = new User();

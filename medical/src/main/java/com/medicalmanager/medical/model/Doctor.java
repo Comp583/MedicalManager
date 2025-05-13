@@ -1,6 +1,7 @@
 package com.medicalmanager.medical.model;
 
 import java.time.DayOfWeek;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashSet;
@@ -9,22 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.CollectionTable;
-import jakarta.persistence.Column;
-import jakarta.persistence.ElementCollection;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.MapKeyColumn;
-import jakarta.persistence.MapKeyEnumerated;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.PrePersist;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "doctors")
@@ -49,13 +35,16 @@ public class Doctor {
     @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name",  nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
     @Column(columnDefinition = "TEXT")
     private String biography;
 
-    //---------------  GENERATED MEDICAL ID  ---------------
+    @Column(name = "is_active", nullable = false)
+    private Boolean isActive = true;
+
+    // --------------- GENERATED MEDICAL ID ---------------
 
     @Column(name = "medical_id", nullable = false, unique = true, updatable = false)
     private String medicalId;
@@ -72,23 +61,23 @@ public class Doctor {
         return medicalId;
     }
 
-    //---------------  ROLES  ---------------
+    // --------------- ROLES ---------------
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "doctor_roles", joinColumns = @JoinColumn(name = "doctor_id"))
     @Column(name = "role")
     private Set<String> roles = new HashSet<>();
 
-    //---------------  AVAILABILITY (embedded map)  ---------------
+    // --------------- AVAILABILITY (embedded map) ---------------
 
     @ElementCollection(fetch = FetchType.EAGER)
     @CollectionTable(name = "doctor_availability", joinColumns = @JoinColumn(name = "doctor_id"))
     @MapKeyColumn(name = "day_of_week")
     @MapKeyEnumerated(EnumType.STRING)
-    
+
     private Map<DayOfWeek, LocalTimeRange> availability = new EnumMap<>(DayOfWeek.class);
 
-    //---------------  SLOTS & BREAKS ---------------
+    // --------------- SLOTS & BREAKS ---------------
 
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<AvailableSlot> availableSlots = new ArrayList<>();
@@ -96,7 +85,7 @@ public class Doctor {
     @OneToMany(mappedBy = "doctor", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<BreakTime> breakTimes = new ArrayList<>();
 
-    //---------------  GETTERS & SETTERS  ---------------
+    // --------------- GETTERS & SETTERS ---------------
 
     public Long getId() {
         return id;
@@ -105,6 +94,7 @@ public class Doctor {
     public int getWorkdayStartHour() {
         return workdayStartHour;
     }
+
     public void setWorkdayStartHour(int workdayStartHour) {
         this.workdayStartHour = workdayStartHour;
     }
@@ -112,6 +102,7 @@ public class Doctor {
     public int getWorkdayEndHour() {
         return workdayEndHour;
     }
+
     public void setWorkdayEndHour(int workdayEndHour) {
         this.workdayEndHour = workdayEndHour;
     }
@@ -119,6 +110,7 @@ public class Doctor {
     public String getUsername() {
         return username;
     }
+
     public void setUsername(String username) {
         this.username = username;
     }
@@ -126,6 +118,7 @@ public class Doctor {
     public String getPasswordHash() {
         return passwordHash;
     }
+
     public void setPasswordHash(String passwordHash) {
         this.passwordHash = passwordHash;
     }
@@ -133,6 +126,7 @@ public class Doctor {
     public String getFirstName() {
         return firstName;
     }
+
     public void setFirstName(String firstName) {
         this.firstName = firstName;
     }
@@ -140,6 +134,7 @@ public class Doctor {
     public String getLastName() {
         return lastName;
     }
+
     public void setLastName(String lastName) {
         this.lastName = lastName;
     }
@@ -147,6 +142,7 @@ public class Doctor {
     public String getBiography() {
         return biography;
     }
+
     public void setBiography(String biography) {
         this.biography = biography;
     }
@@ -154,6 +150,7 @@ public class Doctor {
     public Set<String> getRoles() {
         return roles;
     }
+
     public void setRoles(Set<String> roles) {
         this.roles = roles;
     }
@@ -161,6 +158,7 @@ public class Doctor {
     public Map<DayOfWeek, LocalTimeRange> getAvailability() {
         return availability;
     }
+
     public void setAvailability(Map<DayOfWeek, LocalTimeRange> availability) {
         this.availability = availability;
     }
@@ -168,6 +166,7 @@ public class Doctor {
     public List<AvailableSlot> getAvailableSlots() {
         return availableSlots;
     }
+
     public void setAvailableSlots(List<AvailableSlot> availableSlots) {
         this.availableSlots = availableSlots;
     }
@@ -175,7 +174,16 @@ public class Doctor {
     public List<BreakTime> getBreakTimes() {
         return breakTimes;
     }
+
     public void setBreakTimes(List<BreakTime> breakTimes) {
         this.breakTimes = breakTimes;
+    }
+
+    public Boolean getIsActive() {
+        return isActive;
+    }
+
+    public void setIsActive(Boolean isActive) {
+        this.isActive = isActive;
     }
 }

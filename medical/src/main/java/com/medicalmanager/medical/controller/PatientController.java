@@ -1,5 +1,14 @@
+//MVC Controller for page navigation
 package com.medicalmanager.medical.controller;
 
+import com.medicalmanager.medical.model.Doctor;
+import com.medicalmanager.medical.model.Patient;
+import com.medicalmanager.medical.repository.DoctorRepository;
+import com.medicalmanager.medical.service.PatientService;
+
+import jakarta.persistence.EntityNotFoundException;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,14 +20,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.medicalmanager.medical.model.Patient;
-import com.medicalmanager.medical.model.Doctor;
-import com.medicalmanager.medical.repository.DoctorRepository;
-import com.medicalmanager.medical.service.PatientService;
-
-import jakarta.persistence.EntityNotFoundException;
-
 import java.util.List;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 @RequestMapping("/patient")
@@ -27,6 +30,7 @@ public class PatientController {
     private final PatientService patientService;
     private final DoctorRepository doctorRepository;
 
+    @Autowired
     public PatientController(PatientService patientService, DoctorRepository doctorRepository) {
         this.patientService = patientService;
         this.doctorRepository = doctorRepository;
@@ -34,35 +38,30 @@ public class PatientController {
 
     @GetMapping("/landing")
     public String patientLanding() {
-        return "patient-landing";
+        return "patient/landing";
     }
 
-@GetMapping("/booking")
-public String patientBooking(Model model) {
-    List<Doctor> doctors = doctorRepository.findAll();
-    model.addAttribute("doctors", doctors);
-    return "patient-booking";
-}
+    @GetMapping("/booking")
+    public String bookingPage(Model model) {
+        // gets all active doctors
+        List<Doctor> doctors = doctorRepository.findByIsActive(true);
+        model.addAttribute("doctors", doctors);
+        return "patient/booking";
+    }
 
-    @GetMapping("/notifications")
-    public String patientNotifications() {
-        return "patient-notifications";
+    @GetMapping("/notification")
+    public String notificationsPage() {
+        return "patient/notifications";
     }
 
     @GetMapping("/manage")
-    public String patientDrView(Model model) {
-        List<Doctor> doctors = doctorRepository.findAll();
-        model.addAttribute("doctors", doctors);
-        return "patient-doctorview";
-    }
-
-    @PostMapping
-    public ResponseEntity<Patient> createPatient(@RequestBody Patient patient) {
+    public ResponseEntity<?> managePatient(@PathVariable Long id) {
         try {
-            Patient newPatient = patientService.createPatient(patient);
-            return ResponseEntity.status(HttpStatus.CREATED).body(newPatient);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(null);
+            Patient patient = patientService.getPatientById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("Patient not found"));
+            return ResponseEntity.ok(patient);
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
 

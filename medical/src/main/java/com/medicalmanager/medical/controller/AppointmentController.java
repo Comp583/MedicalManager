@@ -3,6 +3,8 @@ package com.medicalmanager.medical.controller;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
@@ -21,8 +23,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.medicalmanager.medical.dto.AppointmentRequest;
+import com.medicalmanager.medical.dto.AvailabilityDto;
 import com.medicalmanager.medical.model.Appointment;
+import com.medicalmanager.medical.repository.AppointmentRepository;
 import com.medicalmanager.medical.service.AppointmentService;
+import com.medicalmanager.medical.service.AvailabilityService;
 
 import jakarta.persistence.EntityNotFoundException;
 
@@ -31,42 +36,86 @@ import jakarta.persistence.EntityNotFoundException;
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
+    private final AvailabilityService availabilityService;
 
     @Autowired
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService,
+            AvailabilityService availabilityService) {
         this.appointmentService = appointmentService;
+        this.availabilityService = availabilityService;
+    }
+
+    @GetMapping("/availability/{doctorId}")
+    public ResponseEntity<?> getAvailableSlots(
+            @PathVariable Long doctorId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date) {
+        try {
+            List<AvailabilityDto> availableSlots = availabilityService.getAvailableSlots(doctorId, date);
+            return ResponseEntity.ok(availableSlots);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
     }
 
     @PostMapping("/book")
     public ResponseEntity<?> bookAppointment(@RequestBody AppointmentRequest appointmentRequest) {
         try {
+            // First check availability
+            List<AvailabilityDto> availableSlots = availabilityService.getAvailableSlots(
+                    appointmentRequest.getDoctorId(),
+                    appointmentRequest.getAppointmentDate());
+
+            // Verify the requested time is available
+            boolean slotAvailable = availableSlots.stream()
+                    .anyMatch(slot -> slot.getStartTime()
+                            .equals(appointmentRequest.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm"))) &&
+                            slot.getEndTime().equals(
+                                    appointmentRequest.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm"))));
+
+            if (!slotAvailable) {
+                throw new IllegalStateException("The requested time slot is no longer available");
+            }
+
             Appointment appointment = appointmentService.bookAppointment(appointmentRequest);
 
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", true);
-            response.put("appointmentId", appointment.getId());
-            response.put("message", "Appointment booked successfully");
-
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(Map.of(
+                    "success", true,
+                    "appointmentId", appointment.getId(),
+                    "message", "Appointment booked successfully"));
         } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", e.getMessage());
-
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 
-    @GetMapping("/patient")
-    public ResponseEntity<?> getPatientAppointments() {
-        try {
-            return ResponseEntity.ok(appointmentService.getPatientAppointments());
-        } catch (Exception e) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("success", false);
-            response.put("message", e.getMessage());
+    @Autowired
+    private AppointmentRepository appointmentRepository;
 
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    @GetMapping("/patient/{patientId}")
+    public ResponseEntity<?> getPatientAppointments(@PathVariable Long patientId) {
+        try {
+            return ResponseEntity.ok(appointmentRepository.findByPatientId(patientId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
+        }
+    }
+
+    @GetMapping("/doctor/{doctorId}")
+    public ResponseEntity<?> getDoctorAppointments(
+            @PathVariable Long doctorId,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate) {
+        try {
+            if (startDate != null && endDate != null) {
+                return ResponseEntity.ok(appointmentRepository.findByDoctorIdAndAppointmentDateBetween(
+                        doctorId, startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX)));
+            }
+            return ResponseEntity.ok(appointmentRepository.findByDoctorId(doctorId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("success", false, "message", e.getMessage()));
         }
     }
 }

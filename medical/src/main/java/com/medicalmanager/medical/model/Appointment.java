@@ -1,7 +1,6 @@
 //Stores appointment details including doctor, patient, date, time
 package com.medicalmanager.medical.model;
 
-import java.time.LocalDateTime;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.persistence.*;
@@ -9,6 +8,7 @@ import jakarta.persistence.*;
 @Entity
 @Table(name = "appointments")
 public class Appointment {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -39,14 +39,8 @@ public class Appointment {
     @Column
     private String status; // "SCHEDULED", "COMPLETED", "CANCELLED"
 
-    private LocalDateTime dateTime;
-    private Integer duration; // in minutes
-    private String notes;
+    // Getters and Setters
 
-    @Column(name = "previous_appointment_id")
-    private Long previousAppointmentId;
-
-    // Getters
     public Long getId() {
         return id;
     }
@@ -69,22 +63,6 @@ public class Appointment {
 
     public void setPatient(Patient patient) {
         this.patient = patient;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
     }
 
     public LocalDate getAppointmentDate() {
@@ -111,14 +89,6 @@ public class Appointment {
         this.endTime = endTime;
     }
 
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
     public String getAppointmentType() {
         return appointmentType;
     }
@@ -135,20 +105,11 @@ public class Appointment {
         this.reasonForVisit = reasonForVisit;
     }
 
-    public String getNotes() {
-        return notes;
+    public String getStatus() {
+        return status;
     }
 
-    public void setNotes(String notes) {
-        this.notes = notes;
+    public void setStatus(String status) {
+        this.status = status;
     }
-
-    public Long getPreviousAppointmentId() {
-        return previousAppointmentId;
-    }
-
-    public void setPreviousAppointmentId(Long previousAppointmentId) {
-        this.previousAppointmentId = previousAppointmentId;
-    }
-
 }

@@ -151,13 +151,17 @@
             },
             {
               title: "Jane Smith - Contact Lens Fitting - 3:00 PM",
-              start: new Date(new Date().setDate(new Date().getDate() + 1))
+              start: new Date(
+                new Date().setDate(new Date().getAppointmentDate() + 1)
+              )
                 .toISOString()
                 .split("T")[0],
             },
             {
               title: "Robert Johnson - Vision Test - 3:15 PM",
-              start: new Date(new Date().setDate(new Date().getDate() + 1))
+              start: new Date(
+                new Date().setDate(new Date().getAppointmentDate() + 1)
+              )
                 .toISOString()
                 .split("T")[0],
             },

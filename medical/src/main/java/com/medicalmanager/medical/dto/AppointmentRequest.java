@@ -1,20 +1,19 @@
 //Transfer Appointment booking data from frontend to backend
 package com.medicalmanager.medical.dto;
 
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.LocalDate;
 
 public class AppointmentRequest {
     private Long doctorId;
     private Long patientId;
-    private LocalDateTime dateTime;
     private LocalDate appointmentDate;
     private LocalTime appointmentTime;
-    private Integer duration;
     private String appointmentType;
     private String reasonForVisit;
+    private String notes; // Added for additional appointment notes
 
+    // Getters and Setters
     public Long getDoctorId() {
         return doctorId;
     }
@@ -29,14 +28,6 @@ public class AppointmentRequest {
 
     public void setPatientId(Long patientId) {
         this.patientId = patientId;
-    }
-
-    public LocalDateTime getDateTime() {
-        return dateTime;
-    }
-
-    public void setDateTime(LocalDateTime dateTime) {
-        this.dateTime = dateTime;
     }
 
     public LocalDate getAppointmentDate() {
@@ -55,14 +46,6 @@ public class AppointmentRequest {
         this.appointmentTime = appointmentTime;
     }
 
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
     public String getAppointmentType() {
         return appointmentType;
     }
@@ -77,5 +60,13 @@ public class AppointmentRequest {
 
     public void setReasonForVisit(String reasonForVisit) {
         this.reasonForVisit = reasonForVisit;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void setNotes(String notes) {
+        this.notes = notes;
     }
 }
