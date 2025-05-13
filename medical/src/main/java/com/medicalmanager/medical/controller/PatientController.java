@@ -34,7 +34,7 @@ public class PatientController {
 
     @GetMapping("/landing")
     public String patientLanding() {
-        return "patient/landing";
+        return "patient-landing";
     }
 
     @GetMapping("/booking")
