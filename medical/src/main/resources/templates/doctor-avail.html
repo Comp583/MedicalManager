@@ -82,13 +82,34 @@
               <div style="width: 14%">Sat</div>
             </div>
             <div class="d-flex justify-content-between text-center">
-              <div style="width: 14%"><span class="wavy-line">〰</span></div>
-              <div style="width: 14%"><span class="wavy-line">〰</span></div>
-              <div style="width: 14%"><span class="wavy-line">〰</span></div>
-              <div style="width: 14%"><span class="off-day">off</span></div>
-              <div style="width: 14%"><span class="wavy-line">〰</span></div>
-              <div style="width: 14%"><span class="off-day">off</span></div>
-              <div style="width: 14%"><span class="wavy-line">〰</span></div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).SUNDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).SUNDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).SUNDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).SUNDAY)}">off</span>
+              </div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).MONDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).MONDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).MONDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).MONDAY)}">off</span>
+              </div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).TUESDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).TUESDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).TUESDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).TUESDAY)}">off</span>
+              </div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).WEDNESDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).WEDNESDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).WEDNESDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).WEDNESDAY)}">off</span>
+              </div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).THURSDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).THURSDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).THURSDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).THURSDAY)}">off</span>
+              </div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).FRIDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).FRIDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).FRIDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).FRIDAY)}">off</span>
+              </div>
+              <div style="width: 14%" th:classappend="${availableDays.contains(T(java.time.DayOfWeek).SATURDAY)} ? 'wavy-line' : 'off-day'">
+                <span th:if="${scheduleMap.containsKey(T(java.time.DayOfWeek).SATURDAY)}" th:text="${#strings.listJoin(scheduleMap[T(java.time.DayOfWeek).SATURDAY], ', ')}"></span>
+                <span th:if="${!scheduleMap.containsKey(T(java.time.DayOfWeek).SATURDAY)}">off</span>
+              </div>
             </div>
           </div>
 
@@ -96,9 +117,16 @@
             <div class="d-flex justify-content-between align-items-center mb-2">
               <strong>Requested days off:</strong>
             </div>
-            <div class="d-flex justify-content-between align-items-start">
-              <div id="calendar"></div>
-              <button class="btn btn-outline-primary btn-sm">Submit</button>
+            <div class="d-flex" style="align-items: flex-start;">
+              <form id="dayOffForm" method="post" th:action="@{/doctor/avail/dayoff}" style="width: 60%;">
+                <input type="hidden" id="dayOffDate" name="dayOffDate" />
+                <div id="calendar"></div>
+                <button type="submit" class="btn btn-outline-primary btn-sm mt-2">Submit</button>
+              </form>
+              <div id="requestInfo" th:if="${message != null}" style="width: 35%; margin-left: 15px; border: 1px solid #ccc; padding: 10px; border-radius: 5px; position: relative;">
+                <p th:text="${message}" style="font-weight: bold;"></p>
+                <p>Administration will contact you in 2-3 days for your request approval.</p>
+              </div>
             </div>
           </div>
         </div>
@@ -107,15 +135,44 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script>
+    <script th:inline="javascript">
       document.addEventListener("DOMContentLoaded", function () {
         const calendarEl = document.getElementById("calendar");
+        const dayOffDateInput = document.getElementById("dayOffDate");
+        const requestInfo = document.getElementById("requestInfo");
+
+        // Prepare existing day off events from server-side model attribute
+        const existingDayOffs = /*[[${dayOffRequests}]]*/ [];
+        const events = existingDayOffs.map(req => ({
+          title: "Day Off Requested",
+          start: req.dayOffDate,
+          allDay: true,
+          color: "purple"
+        }));
+
         const calendar = new FullCalendar.Calendar(calendarEl, {
           initialView: "dayGridMonth",
           height: 500,
-          events: [],
+          selectable: true,
+          select: function(info) {
+            // Set the selected date in the hidden input
+            dayOffDateInput.value = info.startStr;
+          },
+          events: events,
         });
         calendar.render();
+
+        if (requestInfo) {
+          setTimeout(() => {
+            requestInfo.style.display = 'none';
+          }, 10000);
+        }
+
+        const dayOffForm = document.getElementById("dayOffForm");
+        dayOffForm.addEventListener("submit", function(event) {
+          // Remove client-side event addition to avoid flashing
+          // Just allow form to submit normally
+        });
       });
     </script>
   </body>

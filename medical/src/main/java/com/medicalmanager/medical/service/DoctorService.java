@@ -15,15 +15,33 @@ import java.util.stream.Collectors;
 
 import org.springframework.transaction.annotation.Transactional;
 
+import com.medicalmanager.medical.model.DayOffRequest;
+import com.medicalmanager.medical.repository.DayOffRequestRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import java.time.LocalDate;
+
 @Service
 public class DoctorService {
   private final DoctorRepository doctorRepo;
   private final UserRepository   userRepo;
+  private final DayOffRequestRepository dayOffRequestRepo;
 
   @Autowired
-  public DoctorService(DoctorRepository dr, UserRepository ur) {
+  public DoctorService(DoctorRepository dr, UserRepository ur, DayOffRequestRepository dor) {
     this.doctorRepo = dr;
     this.userRepo   = ur;
+    this.dayOffRequestRepo = dor;
+  }
+
+  public java.util.List<com.medicalmanager.medical.model.DayOffRequest> getDayOffRequestsByUsername(String username) {
+    Doctor doctor = doctorRepo.findByUsername(username).orElse(null);
+    if (doctor == null) {
+      return java.util.Collections.emptyList();
+    }
+    return dayOffRequestRepo.findAll().stream()
+      .filter(req -> req.getDoctor().getId().equals(doctor.getId()))
+      .collect(java.util.stream.Collectors.toList());
   }
 
   @Transactional
@@ -45,6 +63,10 @@ public class DoctorService {
         )
       )
       .collect(Collectors.toList());
+  }
+
+  public Doctor findByUsername(String username) {
+    return doctorRepo.findByUsername(username).orElse(null);
   }
 
   public List<String> getAvailableHourlySlots(Long doctorId, java.time.LocalDate date) {
@@ -72,5 +94,16 @@ public class DoctorService {
       });
 
     return hourlySlots;
+  }
+
+  @Transactional
+  public void requestDayOff(String username, String dayOffDate) {
+    Doctor doctor = doctorRepo.findByUsername(username).orElse(null);
+    if (doctor == null) {
+      throw new IllegalArgumentException("Doctor not found: " + username);
+    }
+    LocalDate date = LocalDate.parse(dayOffDate);
+    DayOffRequest dayOffRequest = new DayOffRequest(doctor, date);
+    dayOffRequestRepo.save(dayOffRequest);
   }
 }
