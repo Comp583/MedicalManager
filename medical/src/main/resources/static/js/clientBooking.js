@@ -259,29 +259,126 @@ document.addEventListener("DOMContentLoaded", function () {
         const appointmentId = cancelButton.getAttribute("data-appointment-id");
         console.log("Cancel button clicked for appointmentId:", appointmentId);
 
-        // Remove appointment from Upcoming Appointments list
-        const appointmentListItem = document.querySelector(`.appointments-box ul li[data-appointment-id="${appointmentId}"]`);
-        console.log("Appointment list item found:", appointmentListItem);
-        if (appointmentListItem) {
-          appointmentListItem.remove();
-        } else {
-          console.warn("Appointment list item not found for id:", appointmentId);
+        const reason = prompt("Enter cancellation reason:");
+        if (!reason) {
+          alert("Cancellation aborted.");
+          return;
         }
 
-        // Remove appointment from FullCalendar
-        let event = calendar.getEventById(appointmentId);
-        if (!event) {
-          // Fallback: find event by matching extendedProps.appointmentId or other property
-          event = calendar.getEvents().find(ev => ev.extendedProps && ev.extendedProps.appointmentId == appointmentId);
+        try {
+          const headers = {
+            "Content-Type": "application/json",
+          };
+          if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+          }
+
+          const url = `/api/appointments/${appointmentId}/cancel`;
+          const response = await fetch(url, {
+            method: "PUT",
+            headers: headers,
+            body: JSON.stringify({ cancellationReason: reason }),
+          });
+
+          if (!response.ok) {
+            let errorMessage = "Cancellation failed";
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorMessage;
+            } catch (e) {}
+            throw new Error(errorMessage);
+          }
+
+          // Remove appointment from Upcoming Appointments list
+          const appointmentListItem = document.querySelector(`.appointments-box ul li[data-appointment-id="${appointmentId}"]`);
+          console.log("Appointment list item found:", appointmentListItem);
+          if (appointmentListItem) {
+            appointmentListItem.remove();
+          } else {
+            console.warn("Appointment list item not found for id:", appointmentId);
+          }
+
+          // Remove appointment from FullCalendar
+          let event = calendar.getEventById(appointmentId);
+          if (!event) {
+            // Fallback: find event by matching extendedProps.appointmentId or other property
+            event = calendar.getEvents().find(ev => ev.extendedProps && ev.extendedProps.appointmentId == appointmentId);
+          }
+          console.log("FullCalendar event found:", event);
+          if (event) {
+            event.remove();
+            calendar.refetchEvents();
+          } else {
+            console.warn("FullCalendar event not found for id:", appointmentId);
+            console.log("Current calendar events:", calendar.getEvents());
+          }
+
+          alert("Appointment cancelled successfully.");
+        } catch (error) {
+          console.error("Cancellation error:", error);
+          alert(error.message);
         }
-        console.log("FullCalendar event found:", event);
-        if (event) {
-          event.remove();
-        } else {
-          console.warn("FullCalendar event not found for id:", appointmentId);
+      } else if (e.target.closest(".delete-appointment-btn")) {
+        const deleteButton = e.target.closest(".delete-appointment-btn");
+        const appointmentId = deleteButton.getAttribute("data-appointment-id");
+        console.log("Delete button clicked for appointmentId:", appointmentId);
+
+        if (!confirm("Are you sure you want to delete this appointment? This action cannot be undone.")) {
+          return;
         }
 
-        alert("Appointment cancelled successfully.");
+        try {
+          const headers = {
+            "Content-Type": "application/json",
+          };
+          if (csrfToken && csrfHeader) {
+            headers[csrfHeader] = csrfToken;
+          }
+
+          const url = `/api/appointments/${appointmentId}`;
+          const response = await fetch(url, {
+            method: "DELETE",
+            headers: headers,
+          });
+
+          if (!response.ok) {
+            let errorMessage = "Deletion failed";
+            try {
+              const errorData = await response.json();
+              errorMessage = errorData.message || errorMessage;
+            } catch (e) {}
+            throw new Error(errorMessage);
+          }
+
+          // Remove appointment from Upcoming Appointments list
+          const appointmentListItem = document.querySelector(`.appointments-box ul li[data-appointment-id="${appointmentId}"]`);
+          console.log("Appointment list item found:", appointmentListItem);
+          if (appointmentListItem) {
+            appointmentListItem.remove();
+          } else {
+            console.warn("Appointment list item not found for id:", appointmentId);
+          }
+
+          // Remove appointment from FullCalendar
+          let event = calendar.getEventById(appointmentId);
+          if (!event) {
+            // Fallback: find event by matching extendedProps.appointmentId or other property
+            event = calendar.getEvents().find(ev => ev.extendedProps && ev.extendedProps.appointmentId == appointmentId);
+          }
+          console.log("FullCalendar event found:", event);
+          if (event) {
+            event.remove();
+            calendar.refetchEvents();
+          } else {
+            console.warn("FullCalendar event not found for id:", appointmentId);
+            console.log("Current calendar events:", calendar.getEvents());
+          }
+
+          alert("Appointment deleted successfully.");
+        } catch (error) {
+          console.error("Deletion error:", error);
+          alert(error.message);
+        }
       }
     });
   }

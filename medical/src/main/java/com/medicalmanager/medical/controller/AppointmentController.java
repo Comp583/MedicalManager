@@ -28,6 +28,7 @@ import com.medicalmanager.medical.service.PatientService;
 import jakarta.persistence.EntityNotFoundException;
 
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
 
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -41,6 +42,16 @@ public class AppointmentController {
     public AppointmentController(AppointmentService appointmentService, PatientService patientService) {
         this.appointmentService = appointmentService;
         this.patientService = patientService;
+    }
+
+    @DeleteMapping("/{appointmentId}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long appointmentId) {
+        try {
+            appointmentService.deleteAppointment(appointmentId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping

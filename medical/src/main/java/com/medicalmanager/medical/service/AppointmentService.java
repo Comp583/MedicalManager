@@ -35,6 +35,13 @@ public class AppointmentService {
         this.doctorRepository = doctorRepository;
     }
 
+    public void deleteAppointment(Long appointmentId) {
+        if (!appointmentRepository.existsById(appointmentId)) {
+            throw new EntityNotFoundException("Appointment not found");
+        }
+        appointmentRepository.deleteById(appointmentId);
+    }
+
     public Appointment bookAppointment(Long doctorId, Long patientId, LocalDateTime dateTime,
             Integer duration, String appointmentType, String reasonForVisit) {
 
