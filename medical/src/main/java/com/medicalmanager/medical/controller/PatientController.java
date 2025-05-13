@@ -50,8 +50,10 @@ public class PatientController {
             Patient patient = patientOpt.get();
             List<Appointment> appointments = appointmentService.getPatientAppointments(patient.getId());
             model.addAttribute("appointments", appointments);
+            model.addAttribute("patientName", patient.getFullName());
         } else {
             model.addAttribute("appointments", List.of());
+            model.addAttribute("patientName", "User");
         }
         return "patient-landing";
     }
@@ -63,21 +65,26 @@ public String patientBooking(Model model) {
     return "patient-booking";
 }
 
-@GetMapping("/notifications")
-public String patientNotifications(Model model) {
-    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-    String username = authentication.getName();
+    @GetMapping("/notifications")
+    public String patientNotifications(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
 
-    Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
-    if (patientOpt.isPresent()) {
-        Patient patient = patientOpt.get();
-        List<Appointment> bookedAppointments = appointmentService.getPatientAppointments(patient.getId());
-        model.addAttribute("bookedAppointments", bookedAppointments);
-    } else {
-        model.addAttribute("bookedAppointments", List.of());
+        Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
+        if (patientOpt.isPresent()) {
+            Patient patient = patientOpt.get();
+            List<Appointment> bookedAppointments = appointmentService.getPatientAppointments(patient.getId());
+            model.addAttribute("bookedAppointments", bookedAppointments);
+
+            // Add pending change requests
+            var changeRequests = appointmentService.getPendingChangeRequestsForPatient(patient.getId());
+            model.addAttribute("changeRequests", changeRequests);
+        } else {
+            model.addAttribute("bookedAppointments", List.of());
+            model.addAttribute("changeRequests", List.of());
+        }
+        return "patient-notifications";
     }
-    return "patient-notifications";
-}
 
     @GetMapping("/manage")
     public String patientDrView(Model model) {

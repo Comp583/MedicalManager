@@ -37,20 +37,20 @@ public class DataInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) {
         // Creates test users if they don't exist
-        if (userRepository.findByUsername("tempclient").isEmpty()) {
+        if (userRepository.findByUsername("Emma Chavez").isEmpty()) {
             User patient = new User();
-            patient.setUsername("tempclient");
+            patient.setUsername("Emma Chavez");
             patient.setPassword(passwordEncoder.encode("client123"));
             patient.setRole("PATIENT");
             userRepository.save(patient);
         }
 
         // Create Patient entity for tempclient if not exists
-        if (patientRepository.findByUsername("tempclient").isEmpty()) {
+        if (patientRepository.findByUsername("Emma Chavez").isEmpty()) {
             Patient patientEntity = new Patient();
-            patientEntity.setUsername("tempclient");
-            patientEntity.setFirstName("Temp");
-            patientEntity.setLastName("Client");
+            patientEntity.setUsername("Emma Chavez");
+            patientEntity.setFirstName("Emma");
+            patientEntity.setLastName("Chavez");
             patientEntity.setCreatedAt(LocalDateTime.now());
             patientRepository.save(patientEntity);
         }

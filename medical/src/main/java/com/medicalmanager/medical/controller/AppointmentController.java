@@ -44,6 +44,35 @@ public class AppointmentController {
         this.patientService = patientService;
     }
 
+    // Existing methods...
+
+    @PostMapping("/{appointmentId}/request-change")
+    public ResponseEntity<?> requestAppointmentChange(
+            @PathVariable Long appointmentId,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate requestedDate) {
+        try {
+            java.time.LocalDateTime requestedDateTime = requestedDate.atStartOfDay();
+            var changeRequest = appointmentService.createChangeRequest(appointmentId, requestedDateTime);
+            return ResponseEntity.ok(changeRequest);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/change-request/{requestId}/respond")
+    public ResponseEntity<?> respondToChangeRequest(
+            @PathVariable Long requestId,
+            @RequestParam String action) { // action = "accept" or "decline"
+        try {
+            var changeRequest = appointmentService.respondToChangeRequest(requestId, action);
+            return ResponseEntity.ok(changeRequest);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
     @DeleteMapping("/{appointmentId}")
     public ResponseEntity<Void> deleteAppointment(@PathVariable Long appointmentId) {
         try {

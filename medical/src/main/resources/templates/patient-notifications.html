@@ -91,13 +91,27 @@
         <div class="notification-item">
           <div class="notification-content">
             <div class="notification-title">Dr. requested change</div>
-            <div class="notification-details">Details...</div>
-            <div class="notification-actions">
-              <button class="btn btn-outline-primary btn-small">Accept</button>
-              <button class="btn btn-outline-danger btn-small">Decline</button>
+            <div class="notification-details" th:if="${changeRequests}">
+              <ul class="list-group list-group-flush">
+                <li class="list-group-item d-flex justify-content-between align-items-center" th:each="changeRequest : ${changeRequests}" th:data-request-id="${changeRequest.id}">
+                  <div>
+                    <strong th:text="${changeRequest.appointment.patient.username}">Username</strong>
+                    <span> requested to change appointment to </span>
+                    <strong th:text="${changeRequest.appointment.doctor.firstName} + ' ' + ${changeRequest.appointment.doctor.lastName}">Doctor Name</strong>
+                    <span> on </span>
+                    <span th:text="${#temporals.format(changeRequest.requestedDateTime, 'MMM dd, yyyy HH:mm')}">Requested Date Time</span>
+                    <div>
+                      <small th:text="${changeRequest.appointment.appointmentType}">Appointment Type</small>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+            <div class="notification-details" th:if="${#lists.isEmpty(changeRequests)}">
+              No requested changes.
             </div>
           </div>
-          <div class="date">Date</div>
+          <div class="date" th:text="${#temporals.format(T(java.time.LocalDateTime).now(), 'MMM dd, yyyy')}">Date</div>
         </div>
       </div>
     </div>

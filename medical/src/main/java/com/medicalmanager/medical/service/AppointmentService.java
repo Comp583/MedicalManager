@@ -14,7 +14,9 @@ import org.springframework.stereotype.Service;
 import com.medicalmanager.medical.model.Appointment;
 import com.medicalmanager.medical.model.Doctor;
 import com.medicalmanager.medical.model.Patient;
+import com.medicalmanager.medical.model.AppointmentChangeRequest;
 import com.medicalmanager.medical.repository.AppointmentRepository;
+import com.medicalmanager.medical.repository.AppointmentChangeRequestRepository;
 import com.medicalmanager.medical.repository.DoctorRepository;
 import com.medicalmanager.medical.repository.PatientRepository;
 
@@ -23,14 +25,17 @@ import jakarta.persistence.EntityNotFoundException;
 @Service
 public class AppointmentService {
     private final AppointmentRepository appointmentRepository;
+    private final AppointmentChangeRequestRepository appointmentChangeRequestRepository;
     private final PatientRepository patientRepository;
     private final DoctorRepository doctorRepository;
 
     public AppointmentService(
             AppointmentRepository appointmentRepository,
+            AppointmentChangeRequestRepository appointmentChangeRequestRepository,
             PatientRepository patientRepository,
             DoctorRepository doctorRepository) {
         this.appointmentRepository = appointmentRepository;
+        this.appointmentChangeRequestRepository = appointmentChangeRequestRepository;
         this.patientRepository = patientRepository;
         this.doctorRepository = doctorRepository;
     }
@@ -40,6 +45,56 @@ public class AppointmentService {
             throw new EntityNotFoundException("Appointment not found");
         }
         appointmentRepository.deleteById(appointmentId);
+    }
+
+    public AppointmentChangeRequest createChangeRequest(Long appointmentId, LocalDateTime requestedDateTime) {
+        Appointment appointment = appointmentRepository.findById(appointmentId)
+                .orElseThrow(() -> new EntityNotFoundException("Appointment not found"));
+
+        AppointmentChangeRequest changeRequest = new AppointmentChangeRequest();
+        changeRequest.setAppointment(appointment);
+        changeRequest.setRequestedDateTime(requestedDateTime);
+        changeRequest.setStatus("pending");
+        changeRequest.setCreatedDate(LocalDateTime.now());
+
+        return appointmentChangeRequestRepository.save(changeRequest);
+    }
+
+    public List<AppointmentChangeRequest> getPendingChangeRequestsForPatient(Long patientId) {
+        return appointmentChangeRequestRepository.findByAppointmentPatientIdAndStatus(patientId, "pending");
+    }
+
+    public AppointmentChangeRequest respondToChangeRequest(Long requestId, String action) {
+        AppointmentChangeRequest changeRequest = appointmentChangeRequestRepository.findById(requestId)
+                .orElseThrow(() -> new EntityNotFoundException("Change request not found"));
+
+        if (!action.equalsIgnoreCase("accept") && !action.equalsIgnoreCase("decline")) {
+            throw new IllegalArgumentException("Invalid action. Must be 'accept' or 'decline'.");
+        }
+
+        changeRequest.setStatus(action.toLowerCase());
+
+        if (action.equalsIgnoreCase("accept")) {
+            // Perform the rescheduling of the appointment
+            Appointment appointment = changeRequest.getAppointment();
+            appointment.setStatus("rescheduled");
+            appointmentRepository.save(appointment);
+
+            Appointment newAppointment = new Appointment();
+            newAppointment.setDoctor(appointment.getDoctor());
+            newAppointment.setPatient(appointment.getPatient());
+            newAppointment.setDateTime(changeRequest.getRequestedDateTime());
+            newAppointment.setDuration(appointment.getDuration());
+            newAppointment.setStatus("scheduled");
+            newAppointment.setAppointmentType(appointment.getAppointmentType());
+            newAppointment.setReasonForVisit(appointment.getReasonForVisit());
+            newAppointment.setNotes(appointment.getNotes());
+            newAppointment.setPreviousAppointmentId(appointment.getId());
+
+            appointmentRepository.save(newAppointment);
+        }
+
+        return appointmentChangeRequestRepository.save(changeRequest);
     }
 
     public Appointment bookAppointment(Long doctorId, Long patientId, LocalDateTime dateTime,

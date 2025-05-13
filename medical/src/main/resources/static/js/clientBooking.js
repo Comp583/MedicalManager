@@ -212,111 +212,117 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   // Add event listeners for Edit and Cancel buttons using event delegation
-  const appointmentsList = document.querySelector(".appointments-box ul");
-  if (appointmentsList) {
-    appointmentsList.addEventListener("click", async (e) => {
-      const editButton = e.target.closest(".edit-appointment-btn");
-      if (editButton) {
-        const appointmentId = editButton.getAttribute("data-appointment-id");
-        const newDateTime = prompt("Enter new date and time (YYYY-MM-DDTHH:mm):");
-        if (!newDateTime) {
-          alert("Reschedule cancelled.");
-          return;
-        }
+      const appointmentsList = document.querySelector(".appointments-box ul");
+      if (appointmentsList) {
+        appointmentsList.addEventListener("click", async (e) => {
+          const editButton = e.target.closest(".edit-appointment-btn");
+          if (editButton) {
+            const appointmentId = editButton.getAttribute("data-appointment-id");
+            const newDateTime = prompt("Enter new date and time (YYYY-MM-DDTHH:mm):");
+            if (!newDateTime) {
+              alert("Change request cancelled.");
+              return;
+            }
+            // Validate newDateTime format: should match YYYY-MM-DD
+            const dateTimeRegex = /^\d{4}-\d{2}-\d{2}$/;
+            if (!dateTimeRegex.test(newDateTime)) {
+              alert("Invalid date format. Please enter in YYYY-MM-DD format.");
+              return;
+            }
 
-        try {
-          const headers = {
-            "Content-Type": "application/json",
-          };
-          if (csrfToken && csrfHeader) {
-            headers[csrfHeader] = csrfToken;
-          }
-
-          const url = `/api/appointments/${appointmentId}/reschedule?newDateTime=${encodeURIComponent(newDateTime)}`;
-          const response = await fetch(url, {
-            method: "PUT",
-            headers: headers,
-          });
-
-          if (!response.ok) {
-            let errorMessage = "Reschedule failed";
             try {
-              const errorData = await response.json();
-              errorMessage = errorData.message || errorMessage;
-            } catch (e) {}
-            throw new Error(errorMessage);
-          }
+              const headers = {
+                "Content-Type": "application/json",
+              };
+              if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+              }
 
-          alert("Appointment rescheduled successfully.");
-          location.reload();
-        } catch (error) {
-          console.error("Reschedule error:", error);
-          alert(error.message);
-        }
-      } else if (e.target.closest(".delete-appointment-btn")) {
-        const deleteButton = e.target.closest(".delete-appointment-btn");
-        const appointmentId = deleteButton.getAttribute("data-appointment-id");
-        console.log("Delete button clicked for appointmentId:", appointmentId);
+              const url = `/api/appointments/${appointmentId}/request-change?requestedDate=${encodeURIComponent(newDateTime)}`;
+              const response = await fetch(url, {
+                method: "POST",
+                headers: headers,
+              });
 
-        if (!confirm("Are you sure you want to delete this appointment? This action cannot be undone.")) {
-          return;
-        }
+              if (!response.ok) {
+                let errorMessage = "Change request failed";
+                try {
+                  const errorData = await response.json();
+                  errorMessage = errorData.message || errorMessage;
+                } catch (e) {}
+                throw new Error(errorMessage);
+              }
 
-        try {
-          const headers = {
-            "Content-Type": "application/json",
-          };
-          if (csrfToken && csrfHeader) {
-            headers[csrfHeader] = csrfToken;
-          }
+              alert("Change request sent successfully.");
+              location.reload();
+            } catch (error) {
+              console.error("Change request error:", error);
+              alert(error.message);
+            }
+          } else if (e.target.closest(".delete-appointment-btn")) {
+            const deleteButton = e.target.closest(".delete-appointment-btn");
+            const appointmentId = deleteButton.getAttribute("data-appointment-id");
+            console.log("Delete button clicked for appointmentId:", appointmentId);
 
-          const url = `/api/appointments/${appointmentId}`;
-          const response = await fetch(url, {
-            method: "DELETE",
-            headers: headers,
-          });
+            if (!confirm("Are you sure you want to delete this appointment? This action cannot be undone.")) {
+              return;
+            }
 
-          if (!response.ok) {
-            let errorMessage = "Deletion failed";
             try {
-              const errorData = await response.json();
-              errorMessage = errorData.message || errorMessage;
-            } catch (e) {}
-            throw new Error(errorMessage);
-          }
+              const headers = {
+                "Content-Type": "application/json",
+              };
+              if (csrfToken && csrfHeader) {
+                headers[csrfHeader] = csrfToken;
+              }
 
-          // Remove appointment from Upcoming Appointments list
-          const appointmentListItem = document.querySelector(`.appointments-box ul li[data-appointment-id="${appointmentId}"]`);
-          console.log("Appointment list item found:", appointmentListItem);
-          if (appointmentListItem) {
-            appointmentListItem.remove();
-          } else {
-            console.warn("Appointment list item not found for id:", appointmentId);
-          }
+              const url = `/api/appointments/${appointmentId}`;
+              const response = await fetch(url, {
+                method: "DELETE",
+                headers: headers,
+              });
 
-          // Remove appointment from FullCalendar
-          let event = calendar.getEventById(appointmentId);
-          if (!event) {
-            // Fallback: find event by matching extendedProps.appointmentId or other property
-            event = calendar.getEvents().find(ev => ev.extendedProps && ev.extendedProps.appointmentId == appointmentId);
-          }
-          console.log("FullCalendar event found:", event);
-          if (event) {
-            event.remove();
-            calendar.refetchEvents();
-          } else {
-            console.warn("FullCalendar event not found for id:", appointmentId);
-            console.log("Current calendar events:", calendar.getEvents());
-          }
+              if (!response.ok) {
+                let errorMessage = "Deletion failed";
+                try {
+                  const errorData = await response.json();
+                  errorMessage = errorData.message || errorMessage;
+                } catch (e) {}
+                throw new Error(errorMessage);
+              }
 
-          alert("Appointment deleted successfully.");
-        } catch (error) {
-          console.error("Deletion error:", error);
-          alert(error.message);
-        }
+              // Remove appointment from Upcoming Appointments list
+              const appointmentListItem = document.querySelector(`.appointments-box ul li[data-appointment-id="${appointmentId}"]`);
+              console.log("Appointment list item found:", appointmentListItem);
+              if (appointmentListItem) {
+                appointmentListItem.remove();
+              } else {
+                console.warn("Appointment list item not found for id:", appointmentId);
+              }
+
+              // Remove appointment from FullCalendar
+              let event = calendar.getEventById(appointmentId);
+              if (!event) {
+                // Fallback: find event by matching extendedProps.appointmentId or other property
+                event = calendar.getEvents().find(ev => ev.extendedProps && ev.extendedProps.appointmentId == appointmentId);
+              }
+              console.log("FullCalendar event found:", event);
+              if (event) {
+                event.remove();
+                calendar.refetchEvents();
+              } else {
+                console.warn("FullCalendar event not found for id:", appointmentId);
+                console.log("Current calendar events:", calendar.getEvents());
+              }
+
+              alert("Appointment deleted successfully.");
+            } catch (error) {
+              console.error("Deletion error:", error);
+              alert(error.message);
+            }
+          }
+        });
       }
-    });
-  }
 
   // Initialize
   fetchDoctors();
