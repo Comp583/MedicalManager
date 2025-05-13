@@ -39,6 +39,9 @@ public class Appointment {
     @Column
     private String status; // "SCHEDULED", "COMPLETED", "CANCELLED"
 
+    @Column
+    private String notes;
+
     // Getters and Setters
 
     public Long getId() {
@@ -111,5 +114,13 @@ public class Appointment {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    public String getNotes() {
+        return notes;
+    }
+
+    public void steNotes(String notes) {
+        this.notes = notes;
     }
 }

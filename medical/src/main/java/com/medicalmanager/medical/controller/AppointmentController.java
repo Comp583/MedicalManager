@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.medicalmanager.medical.dto.AppointmentRequest;
 import com.medicalmanager.medical.dto.AvailabilityDto;
@@ -31,7 +32,7 @@ import com.medicalmanager.medical.service.AvailabilityService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@Controller
+@RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
 
@@ -115,7 +116,7 @@ public class AppointmentController {
         try {
             if (startDate != null && endDate != null) {
                 return ResponseEntity.ok(appointmentRepository.findByDoctorIdAndAppointmentDateBetween(
-                        doctorId, startDate.atStartOfDay(), endDate.atTime(LocalTime.MAX)));
+                        doctorId, startDate, endDate));
             }
             return ResponseEntity.ok(appointmentRepository.findByDoctorId(doctorId));
         } catch (Exception e) {
