@@ -25,27 +25,27 @@ public class Doctor {
     @Column(name = "workday_end_hour")
     private int workdayEndHour = 17;
 
-    @Column(nullable = false, unique = true)
+    @Column(unique = true)
     private String username;
 
-    @Column(name = "password_hash", nullable = false)
+    @Column(name = "password_hash")
     private String passwordHash;
 
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name")
     private String firstName;
 
-    @Column(name = "last_name", nullable = false)
+    @Column(name = "last_name")
     private String lastName;
 
     @Column(columnDefinition = "TEXT")
     private String biography;
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     private Boolean isActive = true;
 
     // --------------- GENERATED MEDICAL ID ---------------
 
-    @Column(name = "medical_id", nullable = false, unique = true, updatable = false)
+    @Column(name = "medical_id", unique = true, updatable = false)
     private String medicalId;
 
     @PrePersist

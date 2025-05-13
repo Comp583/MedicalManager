@@ -9,8 +9,8 @@ public class BreakTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(optional=false)
-    @JoinColumn(name = "doctor_id", nullable=false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
     private String dayOfWeek;

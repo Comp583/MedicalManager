@@ -8,7 +8,7 @@ import jakarta.persistence.*;
 public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Long userId;
 
     @Column(unique = true)
     private String username;
@@ -22,7 +22,7 @@ public class Patient {
 
     // Getters
     public Long getId() {
-        return id;
+        return userId;
     }
 
     public String getUsername() {
@@ -42,8 +42,8 @@ public class Patient {
     }
 
     // Setters
-    public void setId(Long id) {
-        this.id = id;
+    public void setId(Long userId) {
+        this.userId = userId;
     }
 
     public void setUsername(String username) {
@@ -71,7 +71,7 @@ public class Patient {
     @Override
     public String toString() {
         return "Patient{" +
-                "id=" + id +
+                "userId=" + userId +
                 ", username='" + username + '\'' +
                 ", firstName='" + firstName + '\'' +
                 ", lastName='" + lastName + '\'' +

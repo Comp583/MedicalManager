@@ -16,23 +16,23 @@ public class AvailableSlot {
     }
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "day_of_week", nullable = false)
+    @Column(name = "day_of_week")
     private DayOfWeek dayOfWeek; // 1=Monday, 7=Sunday
 
-    @Column(name = "start_time", nullable = false)
+    @Column(name = "start_time")
     private LocalTime startTime;
 
-    @Column(name = "end_time", nullable = false)
+    @Column(name = "end_time")
     private LocalTime endTime;
 
-    @Column(name = "slot_duration", nullable = false)
+    @Column(name = "slot_duration")
     private Integer slotDurationMinutes; // Duration of each slot in minutes
 
-    @Column(name = "is_active", nullable = false)
+    @Column(name = "is_active")
     private Boolean isActive = true;
 
     public Long getId() {

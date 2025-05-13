@@ -14,23 +14,23 @@ public class Appointment {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "doctor_id", nullable = false)
+    @JoinColumn(name = "doctor_id")
     private Doctor doctor;
 
     @ManyToOne
-    @JoinColumn(name = "patient_id", nullable = false)
+    @JoinColumn(name = "patient_id")
     private Patient patient;
 
-    @Column(nullable = false)
+    @Column()
     private LocalDate appointmentDate;
 
-    @Column(nullable = false)
+    @Column()
     private LocalTime startTime;
 
-    @Column(nullable = false)
+    @Column()
     private LocalTime endTime;
 
-    @Column(nullable = false)
+    @Column()
     private String appointmentType;
 
     @Column(name = "reason_for_visit")

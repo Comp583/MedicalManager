@@ -26,6 +26,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
+        // Returning UserDetails with role and other necessary info
         return new org.springframework.security.core.userdetails.User(
                 user.getUsername(),
                 user.getPassword(),
@@ -34,6 +35,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("No authenticated user found");
+        }
+
         String currentUserEmail = authentication.getName();
 
         Optional<User> userOptional = userRepository.findByEmail(currentUserEmail);
