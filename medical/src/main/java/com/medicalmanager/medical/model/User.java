@@ -1,3 +1,4 @@
+//Authentication and authorization information
 package com.medicalmanager.medical.model;
 
 import jakarta.persistence.*;

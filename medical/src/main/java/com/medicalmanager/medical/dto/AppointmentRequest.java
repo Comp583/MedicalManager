@@ -1,6 +1,9 @@
+//Transfer Appointment booking data from frontend to backend
 package com.medicalmanager.medical.dto;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.LocalDate;
 
 public class AppointmentRequest {
     private Long doctorId;

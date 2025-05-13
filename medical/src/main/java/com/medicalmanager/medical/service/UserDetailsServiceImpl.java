@@ -1,3 +1,4 @@
+//Manages current user context and authentication
 package com.medicalmanager.medical.service;
 
 import com.medicalmanager.medical.model.User;

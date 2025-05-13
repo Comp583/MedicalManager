@@ -1,3 +1,4 @@
+//Handles booking logic and appointment management
 package com.medicalmanager.medical.service;
 
 import java.time.LocalDate;

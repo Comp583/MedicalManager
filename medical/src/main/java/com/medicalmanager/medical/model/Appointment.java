@@ -1,3 +1,4 @@
+//Stores appointment details including doctor, patient, date, time
 package com.medicalmanager.medical.model;
 
 import java.time.LocalDateTime;
