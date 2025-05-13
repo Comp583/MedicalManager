@@ -42,12 +42,12 @@ public class PatientController {
         // gets all active doctors
         List<Doctor> doctors = doctorRepository.findByIsActive(true);
         model.addAttribute("doctors", doctors);
-        return "patient/booking";
+        return "patient-booking";
     }
 
     @GetMapping("/notification")
     public String notificationsPage() {
-        return "patient/notifications";
+        return "patient-notifications";
     }
 
     @GetMapping("/manage")
