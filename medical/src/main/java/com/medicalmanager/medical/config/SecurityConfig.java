@@ -17,11 +17,11 @@ import org.springframework.web.filter.HiddenHttpMethodFilter;
 public class SecurityConfig {
 
   private final UserDetailsService uds;
-  private final PasswordEncoder    pw;
+  private final PasswordEncoder pw;
 
   public SecurityConfig(UserDetailsService uds, PasswordEncoder pw) {
     this.uds = uds;
-    this.pw  = pw;
+    this.pw = pw;
   }
 
   @Bean
@@ -34,37 +34,34 @@ public class SecurityConfig {
 
   @Bean
   public SecurityFilterChain filterChain(HttpSecurity http,
-                                         DaoAuthenticationProvider authProvider)
-                                         throws Exception {
+      DaoAuthenticationProvider authProvider)
+      throws Exception {
     http
-      .authenticationProvider(authProvider)    // <-- register it here
-      .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**"))
-      .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
-      .authorizeHttpRequests(a -> a
-         .requestMatchers("/h2-console/**").permitAll()
-         .requestMatchers("/", "/login", "/css/**", "/js/**", "/img/**").permitAll()
-         .requestMatchers("/admin/**").hasRole("ADMIN")
-         .requestMatchers("/doctor/**").hasRole("DOCTOR")
-         .requestMatchers("/patient/**").hasRole("PATIENT")
-         .anyRequest().authenticated()
-      )
-      .formLogin(f -> f
-         .loginPage("/login")
-         .defaultSuccessUrl("/dashboard", true)
-         .permitAll()
-      )
-      .logout(l -> l
-         .logoutSuccessUrl("/login?logout")
-         .permitAll()
-      );
+        .authenticationProvider(authProvider) // <-- register it here
+        .csrf(csrf -> csrf.ignoringRequestMatchers("/h2-console/**", "/api/appointments/**"))
+        .headers(headers -> headers.frameOptions(frame -> frame.sameOrigin()))
+        .authorizeHttpRequests(a -> a
+            .requestMatchers("/h2-console/**").permitAll()
+            .requestMatchers("/", "/login", "/css/**", "/js/**", "/img/**").permitAll()
+            .requestMatchers("/admin/**").hasRole("ADMIN")
+            .requestMatchers("/doctor/**").hasRole("DOCTOR")
+            .requestMatchers("/api/appointments/**").hasRole("DOCTOR")
+            .requestMatchers("/patient/**").hasRole("PATIENT")
+            .anyRequest().authenticated())
+        .formLogin(f -> f
+            .loginPage("/login")
+            .defaultSuccessUrl("/dashboard", true)
+            .permitAll())
+        .logout(l -> l
+            .logoutSuccessUrl("/login?logout")
+            .permitAll());
     return http.build();
   }
 
   @Bean
-  public FilterRegistrationBean<HiddenHttpMethodFilter> hiddenHttpMethodFilter(){
-      FilterRegistrationBean<HiddenHttpMethodFilter> bean = 
-          new FilterRegistrationBean<>(new HiddenHttpMethodFilter());
-      bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-      return bean;
+  public FilterRegistrationBean<HiddenHttpMethodFilter> hiddenHttpMethodFilter() {
+    FilterRegistrationBean<HiddenHttpMethodFilter> bean = new FilterRegistrationBean<>(new HiddenHttpMethodFilter());
+    bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
+    return bean;
   }
 }

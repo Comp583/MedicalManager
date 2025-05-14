@@ -1,5 +1,4 @@
 
-
 package com.medicalmanager.medical.controller;
 
 import org.springframework.stereotype.Controller;
@@ -42,8 +41,8 @@ public class DoctorController {
 
         if (doctor != null && doctor.getAvailableSlots() != null) {
             availableDays = doctor.getAvailableSlots().stream()
-                .map(slot -> slot.getDayOfWeek())
-                .collect(Collectors.toSet());
+                    .map(slot -> slot.getDayOfWeek())
+                    .collect(Collectors.toSet());
 
             for (var slot : doctor.getAvailableSlots()) {
                 DayOfWeek day = slot.getDayOfWeek();
@@ -52,7 +51,8 @@ public class DoctorController {
             }
         }
 
-        java.util.List<com.medicalmanager.medical.model.DayOffRequest> dayOffRequests = doctorService.getDayOffRequestsByUsername(username);
+        java.util.List<com.medicalmanager.medical.model.DayOffRequest> dayOffRequests = doctorService
+                .getDayOffRequestsByUsername(username);
         model.addAttribute("dayOffRequests", dayOffRequests);
 
         System.out.println("Doctor: " + doctor);
@@ -66,7 +66,8 @@ public class DoctorController {
     }
 
     @PostMapping("/avail/dayoff")
-    public String requestDayOff(@org.springframework.web.bind.annotation.RequestParam("dayOffDate") String dayOffDate, Model model) {
+    public String requestDayOff(@org.springframework.web.bind.annotation.RequestParam("dayOffDate") String dayOffDate,
+            Model model) {
         System.out.println("Received day off request for date: " + dayOffDate);
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String username = authentication.getName();
@@ -78,7 +79,29 @@ public class DoctorController {
     }
 
     @GetMapping("/manage")
-    public String doctorManage() {
+    public String doctorManage(Model model) {
+        // Create dummy list of patient appointments as maps
+        java.util.List<java.util.Map<String, String>> patientAppointments = new java.util.ArrayList<>();
+
+        java.util.Map<String, String> pa1 = new java.util.HashMap<>();
+        pa1.put("fullName", "John Doe");
+        pa1.put("time", "2:30 PM");
+        pa1.put("day", "Monday");
+        patientAppointments.add(pa1);
+
+        java.util.Map<String, String> pa2 = new java.util.HashMap<>();
+        pa2.put("fullName", "Jane Smith");
+        pa2.put("time", "3:00 PM");
+        pa2.put("day", "Tuesday");
+        patientAppointments.add(pa2);
+
+        java.util.Map<String, String> pa3 = new java.util.HashMap<>();
+        pa3.put("fullName", "Robert Johnson");
+        pa3.put("time", "3:15 PM");
+        pa3.put("day", "Wednesday");
+        patientAppointments.add(pa3);
+
+        model.addAttribute("patientAppointments", patientAppointments);
         return "doctor-manage";
     }
 }

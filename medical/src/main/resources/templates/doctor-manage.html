@@ -77,94 +77,202 @@
         <div class="col-md-6">
           <div class="appointments-box">
             <h6>Appointment Details:</h6>
-            <form>
+            <form id="appointmentForm">
               <div class="mb-3">
                 <label for="patient" class="form-label">Patient:</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  id="patient"
-                  name="patient"
-                />
+                <select class="form-select" id="patient" name="patient">
+                  <option
+                    th:each="pa : ${patientAppointments}"
+                    th:value="${pa.fullName}"
+                    th:text="${pa.fullName}"
+                  >
+                    Patient Name
+                  </option>
+                </select>
               </div>
               <div class="mb-3">
                 <label for="time" class="form-label">Time:</label>
-                <input type="time" class="form-control" id="time" name="time" />
+                <input
+                  type="time"
+                  class="form-control"
+                  id="time"
+                  name="time"
+                  step="300"
+                />
               </div>
               <div class="mb-3">
                 <label for="day" class="form-label">Day:</label>
-                <input type="text" class="form-control" id="day" name="day" />
+                <input type="date" class="form-control" id="day" name="day" />
               </div>
               <div class="d-flex justify-content-end gap-2">
-                <button type="button" class="btn btn-outline-primary btn-small">
+                <button
+                  type="button"
+                  id="rescheduleBtn"
+                  class="btn btn-outline-primary btn-small"
+                >
                   Reschedule
                 </button>
-                <button type="button" class="btn btn-outline-danger btn-small">
+                <button
+                  type="button"
+                  id="cancelBtn"
+                  class="btn btn-outline-danger btn-small"
+                >
                   Cancel
                 </button>
               </div>
             </form>
           </div>
         </div>
+
+        <!-- Dummy Patients List -->
+        <div class="col-md-12 mt-4">
+          <h5>Patients List</h5>
+          <ul class="list-group" id="patientList"></ul>
+        </div>
+
+        <script type="module">
+          import CalendarManager from "/js/calendarManager.js";
+
+          document.addEventListener("DOMContentLoaded", async function () {
+            const patientList = document.getElementById("patientList");
+            const patientSelect = document.getElementById("patient");
+            const timeInput = document.getElementById("time");
+            const daySelect = document.getElementById("day");
+            const rescheduleBtn = document.getElementById("rescheduleBtn");
+            const cancelBtn = document.getElementById("cancelBtn");
+            const calendarEl = document.getElementById("calendar");
+
+            // Initialize FullCalendar with empty events initially
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+              initialView: "dayGridMonth",
+              height: 500,
+              eventDidMount: function (info) {
+                const tooltip = document.createElement("div");
+                tooltip.innerText = info.event.title;
+                tooltip.style.position = "absolute";
+                tooltip.style.backgroundColor = "#fff";
+                tooltip.style.border = "1px solid #ccc";
+                tooltip.style.padding = "5px";
+                tooltip.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
+                tooltip.style.zIndex = 9999;
+                tooltip.style.opacity = 1;
+                tooltip.classList.add("fc-tooltip");
+
+                info.el.addEventListener("mouseenter", function (e) {
+                  document.body.appendChild(tooltip);
+                  tooltip.style.top = e.pageY + 10 + "px";
+                  tooltip.style.left = e.pageX + 10 + "px";
+                });
+
+                info.el.addEventListener("mousemove", function (e) {
+                  tooltip.style.top = e.pageY + 10 + "px";
+                  tooltip.style.left = e.pageX + 10 + "px";
+                });
+
+                info.el.addEventListener("mouseleave", function () {
+                  tooltip.remove();
+                });
+              },
+              events: [],
+            });
+
+            calendar.render();
+
+            // Function to refresh patient list UI
+            function refreshPatientList() {
+              const events = CalendarManager.getEvents();
+              patientList.innerHTML = "";
+              events.forEach((event) => {
+                const li = document.createElement("li");
+                li.className = "list-group-item";
+                li.style.cursor = "pointer";
+                const dayOfWeek = CalendarManager.getDayOfWeek(event.day);
+                li.textContent = `${event.patientName} - ${event.time} - ${dayOfWeek}`;
+                li.dataset.fullname = event.patientName;
+                li.dataset.time = event.time;
+                li.dataset.day = event.day;
+                li.addEventListener("click", () => {
+                  patientSelect.value = event.patientName;
+                  timeInput.value = event.time;
+                  daySelect.value = event.day;
+                });
+                patientList.appendChild(li);
+              });
+            }
+
+            // Fetch events from backend API and update calendar and patient list
+            await CalendarManager.fetchEventsFromApi();
+            calendar.removeAllEvents();
+            calendar.addEventSource(CalendarManager.getEvents());
+            refreshPatientList();
+
+            // Reschedule button click handler
+            rescheduleBtn.addEventListener("click", async function () {
+              const selectedPatient = patientSelect.value;
+              const newTime = timeInput.value;
+              const newDay = daySelect.value;
+
+              // Validate time is in 5-minute increments
+              const minutes = parseInt(newTime.split(":")[1], 10);
+              if (minutes % 5 !== 0) {
+                alert("Please select a time with minutes in multiples of 5.");
+                return;
+              }
+
+              // Find event by patient name
+              const events = CalendarManager.getEvents();
+              const event = events.find(
+                (e) => e.patientName === selectedPatient
+              );
+              if (event) {
+                const newDateTime = newDay + "T" + newTime + ":00";
+                console.log("Rescheduling to newDateTime:", newDateTime);
+
+                // Update event data via API
+                const success = await CalendarManager.updateEvent(event.id, {
+                  time: newTime,
+                  day: newDay,
+                });
+                if (success) {
+                  // Update calendar event
+                  const fcEvent = calendar.getEventById(event.id);
+                  if (fcEvent) {
+                    fcEvent.setStart(newDateTime);
+                    fcEvent.setEnd(
+                      new Date(newDateTime).getTime() + 30 * 60000
+                    ); // Set end time 30 mins after start
+                    fcEvent.setProp(
+                      "title",
+                      `${selectedPatient} - Appointment - ${newTime}`
+                    );
+                    calendar.refetchEvents();
+                  }
+                  alert("Appointment rescheduled for " + selectedPatient);
+                } else {
+                  alert("Failed to reschedule appointment.");
+                }
+              } else {
+                alert("Selected patient event not found.");
+              }
+            });
+
+            // Cancel button clears the form
+            cancelBtn.addEventListener("click", function () {
+              patientSelect.selectedIndex = 0;
+              timeInput.value = "";
+              daySelect.selectedIndex = 0;
+            });
+
+            // Listen for calendar event updates to refresh patient list
+            CalendarManager.addListener(() => {
+              refreshPatientList();
+            });
+          });
+        </script>
       </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.8/index.global.min.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const calendarEl = document.getElementById("calendar");
-        const calendar = new FullCalendar.Calendar(calendarEl, {
-          initialView: "dayGridMonth",
-          height: 500,
-          eventDidMount: function (info) {
-            const tooltip = document.createElement("div");
-            tooltip.innerText = info.event.title;
-            tooltip.style.position = "absolute";
-            tooltip.style.backgroundColor = "#fff";
-            tooltip.style.border = "1px solid #ccc";
-            tooltip.style.padding = "5px";
-            tooltip.style.boxShadow = "0 2px 5px rgba(0,0,0,0.1)";
-            tooltip.style.zIndex = 9999;
-            tooltip.style.opacity = 1;
-            tooltip.classList.add("fc-tooltip");
-
-            info.el.addEventListener("mouseenter", function (e) {
-              document.body.appendChild(tooltip);
-              tooltip.style.top = e.pageY + 10 + "px";
-              tooltip.style.left = e.pageX + 10 + "px";
-            });
-
-            info.el.addEventListener("mousemove", function (e) {
-              tooltip.style.top = e.pageY + 10 + "px";
-              tooltip.style.left = e.pageX + 10 + "px";
-            });
-
-            info.el.addEventListener("mouseleave", function () {
-              tooltip.remove();
-            });
-          },
-          events: [
-            {
-              title: "John Doe - Eye Exam - 2:30 PM",
-              start: new Date().toISOString().split("T")[0],
-            },
-            {
-              title: "Jane Smith - Contact Lens Fitting - 3:00 PM",
-              start: new Date(new Date().setDate(new Date().getDate() + 1))
-                .toISOString()
-                .split("T")[0],
-            },
-            {
-              title: "Robert Johnson - Vision Test - 3:15 PM",
-              start: new Date(new Date().setDate(new Date().getDate() + 1))
-                .toISOString()
-                .split("T")[0],
-            },
-          ],
-        });
-        calendar.render();
-      });
-    </script>
   </body>
 </html>
