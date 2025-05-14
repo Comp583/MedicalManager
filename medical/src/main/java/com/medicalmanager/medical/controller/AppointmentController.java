@@ -4,6 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.HashMap;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
@@ -19,17 +21,66 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.medicalmanager.medical.dto.AppointmentRequest;
 import com.medicalmanager.medical.model.Appointment;
+import com.medicalmanager.medical.model.Patient;
 import com.medicalmanager.medical.service.AppointmentService;
+import com.medicalmanager.medical.service.PatientService;
 
 import jakarta.persistence.EntityNotFoundException;
 
-@Controller
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+
+@RestController
 @RequestMapping("/api/appointments")
 public class AppointmentController {
     private final AppointmentService appointmentService;
+    private final PatientService patientService;
 
-    public AppointmentController(AppointmentService appointmentService) {
+    public AppointmentController(AppointmentService appointmentService, PatientService patientService) {
         this.appointmentService = appointmentService;
+        this.patientService = patientService;
+    }
+
+    // Existing methods...
+
+    @PostMapping("/{appointmentId}/request-change")
+    public ResponseEntity<?> requestAppointmentChange(
+            @PathVariable Long appointmentId,
+            @RequestParam @org.springframework.format.annotation.DateTimeFormat(iso = org.springframework.format.annotation.DateTimeFormat.ISO.DATE) java.time.LocalDate requestedDate) {
+        try {
+            java.time.LocalDateTime requestedDateTime = requestedDate.atStartOfDay();
+            var changeRequest = appointmentService.createChangeRequest(appointmentId, requestedDateTime);
+            return ResponseEntity.ok(changeRequest);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PutMapping("/change-request/{requestId}/respond")
+    public ResponseEntity<?> respondToChangeRequest(
+            @PathVariable Long requestId,
+            @RequestParam String action) { // action = "accept" or "decline"
+        try {
+            var changeRequest = appointmentService.respondToChangeRequest(requestId, action);
+            return ResponseEntity.ok(changeRequest);
+        } catch (jakarta.persistence.EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @DeleteMapping("/{appointmentId}")
+    public ResponseEntity<Void> deleteAppointment(@PathVariable Long appointmentId) {
+        try {
+            appointmentService.deleteAppointment(appointmentId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @PostMapping
@@ -46,6 +97,43 @@ public class AppointmentController {
         } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
+    }
+
+    @PostMapping("/log")
+    public ResponseEntity<String> logAppointment(@RequestBody AppointmentRequest request) {
+        System.out.println("Received appointment booking data:");
+        System.out.println("Doctor ID: " + request.getDoctorId());
+        System.out.println("Patient ID: " + request.getPatientId());
+        System.out.println("DateTime: " + request.getDateTime());
+        System.out.println("Duration: " + request.getDuration());
+        System.out.println("Appointment Type: " + request.getAppointmentType());
+        System.out.println("Reason for Visit: " + request.getReasonForVisit());
+        return ResponseEntity.ok("Logged appointment data successfully");
+    }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<List<Map<String, Object>>> getPatientCalendarAppointments() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        // Use patientService to get patient by username
+        Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
+        if (patientOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+        Patient patient = patientOpt.get();
+
+        List<Appointment> appointments = appointmentService.getPatientAppointments(patient.getId());
+
+        // Map appointments to calendar event format
+        List<Map<String, Object>> events = appointments.stream().map(appointment -> {
+            Map<String, Object> event = new HashMap<>();
+            event.put("title", appointment.getDoctor().getFirstName() + " " + appointment.getDoctor().getLastName() + " - " + appointment.getDateTime().toLocalTime().toString());
+            event.put("start", appointment.getDateTime().toLocalDate().toString());
+            return event;
+        }).toList();
+
+        return ResponseEntity.ok(events);
     }
 
     @GetMapping("/doctor/{doctorId}")

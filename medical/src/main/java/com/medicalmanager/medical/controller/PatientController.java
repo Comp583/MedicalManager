@@ -15,10 +15,16 @@ import com.medicalmanager.medical.model.Patient;
 import com.medicalmanager.medical.model.Doctor;
 import com.medicalmanager.medical.repository.DoctorRepository;
 import com.medicalmanager.medical.service.PatientService;
+import com.medicalmanager.medical.service.AppointmentService;
+import com.medicalmanager.medical.model.Appointment;
 
 import jakarta.persistence.EntityNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
+
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 @Controller
 @RequestMapping("/patient")
@@ -26,14 +32,29 @@ public class PatientController {
 
     private final PatientService patientService;
     private final DoctorRepository doctorRepository;
+    private final AppointmentService appointmentService;
 
-    public PatientController(PatientService patientService, DoctorRepository doctorRepository) {
+    public PatientController(PatientService patientService, DoctorRepository doctorRepository, AppointmentService appointmentService) {
         this.patientService = patientService;
         this.doctorRepository = doctorRepository;
+        this.appointmentService = appointmentService;
     }
 
     @GetMapping("/landing")
-    public String patientLanding() {
+    public String patientLanding(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
+        if (patientOpt.isPresent()) {
+            Patient patient = patientOpt.get();
+            List<Appointment> appointments = appointmentService.getPatientAppointments(patient.getId());
+            model.addAttribute("appointments", appointments);
+            model.addAttribute("patientName", patient.getFullName());
+        } else {
+            model.addAttribute("appointments", List.of());
+            model.addAttribute("patientName", "User");
+        }
         return "patient-landing";
     }
 
@@ -45,7 +66,23 @@ public String patientBooking(Model model) {
 }
 
     @GetMapping("/notifications")
-    public String patientNotifications() {
+    public String patientNotifications(Model model) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        Optional<Patient> patientOpt = patientService.getPatientByUsername(username);
+        if (patientOpt.isPresent()) {
+            Patient patient = patientOpt.get();
+            List<Appointment> bookedAppointments = appointmentService.getPatientAppointments(patient.getId());
+            model.addAttribute("bookedAppointments", bookedAppointments);
+
+            // Add pending change requests
+            var changeRequests = appointmentService.getPendingChangeRequestsForPatient(patient.getId());
+            model.addAttribute("changeRequests", changeRequests);
+        } else {
+            model.addAttribute("bookedAppointments", List.of());
+            model.addAttribute("changeRequests", List.of());
+        }
         return "patient-notifications";
     }
 
