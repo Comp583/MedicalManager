@@ -61,7 +61,7 @@ public class DataInitializer implements CommandLineRunner {
             patientRepository.save(patientEntity);
         }
 
-        //// Only ever will be us admins
+        ////Only ever will be us admins
         if (userRepository.findByUsername("nic_admin").isEmpty()) {
             User nicAdmin = new User();
             nicAdmin.setUsername("nic_admin");
@@ -85,16 +85,16 @@ public class DataInitializer implements CommandLineRunner {
             angelAdmin.setRole("ADMIN");
             userRepository.save(angelAdmin);
         }
-        //// Potential to add more doctors later
+        ////Potential to add more doctors later
 
         // Insert sample doctors from DB_schema.js if not present
         insertDoctorIfNotExists("dr.smith", "John", "Smith",
-                "Dr. Smith is a comprehensive ophthalmologist with over 15 years of experience in cataract surgery and general eye care.",
-                new String[][] {
-                        { "MONDAY", "09:00", "17:00" },
-                        { "WEDNESDAY", "09:00", "17:00" },
-                        { "FRIDAY", "09:00", "15:00" }
-                }, "doctor123");
+        "Dr. Smith is a comprehensive ophthalmologist with over 15 years of experience in cataract surgery and general eye care.",
+        new String[][]{
+                {"MONDAY", "09:00", "17:00"},
+                {"WEDNESDAY", "09:00", "17:00"},
+                {"FRIDAY", "09:00", "15:00"}
+        }, "doctor123");
 
         // Create User entity for dr.smith
         if (userRepository.findByUsername("dr.smith").isEmpty()) {
@@ -106,12 +106,12 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         insertDoctorIfNotExists("dr.patel", "Riya", "Patel",
-                "Dr. Patel is a pediatric optometrist focusing on children's vision, including lazy eye treatment and vision therapy.",
-                new String[][] {
-                        { "TUESDAY", "08:00", "16:00" },
-                        { "THURSDAY", "08:00", "16:00" },
-                        { "SATURDAY", "10:00", "14:00" }
-                }, "doctor123");
+        "Dr. Patel is a pediatric optometrist focusing on children's vision, including lazy eye treatment and vision therapy.",
+        new String[][]{
+                {"TUESDAY", "08:00", "16:00"},
+                {"THURSDAY", "08:00", "16:00"},
+                {"SATURDAY", "10:00", "14:00"}
+        }, "doctor123");        
 
         // Create User entity for dr.patel
         if (userRepository.findByUsername("dr.patel").isEmpty()) {
@@ -123,12 +123,12 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         insertDoctorIfNotExists("dr.johnson", "Michael", "Johnson",
-                "Dr. Johnson is a retinal specialist treating complex retinal diseases such as macular degeneration and diabetic retinopathy.",
-                new String[][] {
-                        { "MONDAY", "10:00", "18:00" },
-                        { "THURSDAY", "10:00", "18:00" },
-                        { "FRIDAY", "10:00", "16:00" }
-                }, "doctor123");
+         "Dr. Johnson is a retinal specialist treating complex retinal diseases such as macular degeneration and diabetic retinopathy.",
+         new String[][]{
+                {"MONDAY", "10:00", "18:00"},
+                {"THURSDAY", "10:00", "18:00"},
+                {"FRIDAY", "10:00", "16:00"}
+        }, "doctor123");
 
         // Create User entity for dr.johnson
         if (userRepository.findByUsername("dr.johnson").isEmpty()) {
@@ -140,12 +140,12 @@ public class DataInitializer implements CommandLineRunner {
         }
 
         insertDoctorIfNotExists("dr.garcia", "Elena", "Garcia",
-                "Dr. Garcia is a glaucoma specialist with advanced training in laser and surgical treatments for glaucoma management.",
-                new String[][] {
-                        { "TUESDAY", "09:00", "17:00" },
-                        { "WEDNESDAY", "09:00", "17:00" },
-                        { "FRIDAY", "09:00", "15:00" }
-                }, "doctor123");
+        "Dr. Garcia is a glaucoma specialist with advanced training in laser and surgical treatments for glaucoma management.",
+        new String[][]{
+                {"TUESDAY", "09:00", "17:00"},
+                {"WEDNESDAY", "09:00", "17:00"},
+                {"FRIDAY", "09:00", "15:00"}
+        }, "doctor123");
 
         // Create User entity for dr.garcia
         if (userRepository.findByUsername("dr.garcia").isEmpty()) {
@@ -164,8 +164,7 @@ public class DataInitializer implements CommandLineRunner {
         // Create dummy appointments if not exist
         createDummyAppointment("dr.smith", "John Doe", LocalDateTime.now().plusDays(1).withHour(14).withMinute(30));
         createDummyAppointment("dr.smith", "Jane Smith", LocalDateTime.now().plusDays(2).withHour(15).withMinute(0));
-        createDummyAppointment("dr.smith", "Robert Johnson",
-                LocalDateTime.now().plusDays(3).withHour(15).withMinute(15));
+        createDummyAppointment("dr.smith", "Robert Johnson", LocalDateTime.now().plusDays(3).withHour(15).withMinute(15));
     }
 
     private void createDummyPatient(String fullName) {
@@ -191,13 +190,11 @@ public class DataInitializer implements CommandLineRunner {
         if (doctorOpt.isPresent() && patientOpt.isPresent()) {
             var doctor = doctorOpt.get();
             var patient = patientOpt.get();
-            // Fetch all appointments for doctor and patient and check if any match the
-            // dateTime
-            List<Appointment> existingAppointments = appointmentRepository
-                    .findByDoctorIdAndDateTimeBetweenOrderByDateTimeAsc(
-                            doctor.getId(), dateTime.minusMinutes(1), dateTime.plusMinutes(1));
-            boolean exists = existingAppointments.stream()
-                    .anyMatch(a -> a.getPatient().getId().equals(patient.getId()) && a.getDateTime().equals(dateTime));
+            // Fetch all appointments for doctor and patient and check if any match the dateTime
+            List<Appointment> existingAppointments = appointmentRepository.findByDoctorIdAndDateTimeBetweenOrderByDateTimeAsc(
+                doctor.getId(), dateTime.minusMinutes(1), dateTime.plusMinutes(1));
+            boolean exists = existingAppointments.stream().anyMatch(a ->
+                a.getPatient().getId().equals(patient.getId()) && a.getDateTime().equals(dateTime));
             if (!exists) {
                 Appointment appointment = new Appointment();
                 appointment.setDoctor(doctor);
@@ -213,8 +210,7 @@ public class DataInitializer implements CommandLineRunner {
         }
     }
 
-    private void insertDoctorIfNotExists(String username, String firstName, String lastName, String biography,
-            String[][] slots, String rawPassword) {
+    private void insertDoctorIfNotExists(String username, String firstName, String lastName, String biography, String[][] slots, String rawPassword) {
         Optional<Doctor> existingDoctor = doctorRepository.findByUsername(username);
         if (existingDoctor.isEmpty()) {
             Doctor doctor = new Doctor();
