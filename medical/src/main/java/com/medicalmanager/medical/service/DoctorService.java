@@ -24,13 +24,13 @@ import java.time.LocalDate;
 @Service
 public class DoctorService {
   private final DoctorRepository doctorRepo;
-  private final UserRepository   userRepo;
+  private final UserRepository userRepo;
   private final DayOffRequestRepository dayOffRequestRepo;
 
   @Autowired
   public DoctorService(DoctorRepository dr, UserRepository ur, DayOffRequestRepository dor) {
     this.doctorRepo = dr;
-    this.userRepo   = ur;
+    this.userRepo = ur;
     this.dayOffRequestRepo = dor;
   }
 
@@ -40,14 +40,15 @@ public class DoctorService {
       return java.util.Collections.emptyList();
     }
     return dayOffRequestRepo.findAll().stream()
-      .filter(req -> req.getDoctor().getId().equals(doctor.getId()))
-      .collect(java.util.stream.Collectors.toList());
+        .filter(req -> req.getDoctor().getId().equals(doctor.getId()))
+        .collect(java.util.stream.Collectors.toList());
   }
 
+  // function
   @Transactional
   public void deleteDoctorAndUser(Long id) {
     Doctor d = doctorRepo.findById(id)
-                 .orElseThrow(() -> new NoSuchElementException("No doctor "+id));
+        .orElseThrow(() -> new NoSuchElementException("No doctor " + id));
     doctorRepo.delete(d);
     userRepo.deleteByUsername(d.getUsername());
   }
@@ -55,14 +56,12 @@ public class DoctorService {
   public List<Doctor> findDoctorsByDay(DayOfWeek day) {
     List<Doctor> allDoctors = doctorRepo.findAll();
     return allDoctors.stream()
-      .filter(d -> d.getAvailableSlots() != null && d.getAvailableSlots().stream()
-        .anyMatch(slot -> slot.getDayOfWeek() == day &&
-          slot.getStartTime() != null &&
-          slot.getEndTime() != null &&
-          slot.getStartTime().isBefore(slot.getEndTime())
-        )
-      )
-      .collect(Collectors.toList());
+        .filter(d -> d.getAvailableSlots() != null && d.getAvailableSlots().stream()
+            .anyMatch(slot -> slot.getDayOfWeek() == day &&
+                slot.getStartTime() != null &&
+                slot.getEndTime() != null &&
+                slot.getStartTime().isBefore(slot.getEndTime())))
+        .collect(Collectors.toList());
   }
 
   public Doctor findByUsername(String username) {
@@ -71,7 +70,7 @@ public class DoctorService {
 
   public List<String> getAvailableHourlySlots(Long doctorId, java.time.LocalDate date) {
     Doctor doctor = doctorRepo.findById(doctorId)
-      .orElseThrow(() -> new NoSuchElementException("No doctor found with id " + doctorId));
+        .orElseThrow(() -> new NoSuchElementException("No doctor found with id " + doctorId));
 
     java.time.DayOfWeek dayOfWeek = date.getDayOfWeek();
 
@@ -82,16 +81,16 @@ public class DoctorService {
     }
 
     doctor.getAvailableSlots().stream()
-      .filter(slot -> slot.getDayOfWeek() == dayOfWeek)
-      .forEach(slot -> {
-        java.time.LocalTime start = slot.getStartTime();
-        java.time.LocalTime end = slot.getEndTime();
+        .filter(slot -> slot.getDayOfWeek() == dayOfWeek)
+        .forEach(slot -> {
+          java.time.LocalTime start = slot.getStartTime();
+          java.time.LocalTime end = slot.getEndTime();
 
-        while (!start.isAfter(end.minusHours(1))) {
-          hourlySlots.add(start.toString());
-          start = start.plusHours(1);
-        }
-      });
+          while (!start.isAfter(end.minusHours(1))) {
+            hourlySlots.add(start.toString());
+            start = start.plusHours(1);
+          }
+        });
 
     return hourlySlots;
   }
